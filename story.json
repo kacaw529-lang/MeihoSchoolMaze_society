@@ -1,0 +1,1537 @@
+{
+  "meta": {
+    "id": "meihe-timekeeper-full",
+    "title": "時空維護者",
+    "theme": "黑洞扭曲時空 × 校園社會探索",
+    "voice": "時空管理局"
+  },
+  "nav": "clueDriven",
+  "backend": {
+    "url": "",
+    "logGps": true,
+    "gpsIntervalSec": 15
+  },
+  "items": {
+    "fA_PAYPHONE": {
+      "label": "碎片碼 9",
+      "glyph": "9"
+    },
+    "fA_PAVILION": {
+      "label": "碎片碼 4",
+      "glyph": "4"
+    },
+    "fA_PAPAYA": {
+      "label": "碎片碼 3",
+      "glyph": "3"
+    },
+    "fA_CAMPHOR": {
+      "label": "碎片碼 7",
+      "glyph": "7"
+    },
+    "fA_LUNCH": {
+      "label": "碎片碼 5",
+      "glyph": "5"
+    },
+    "fB_LIBRARY": {
+      "label": "碎片碼 2",
+      "glyph": "2"
+    },
+    "fB_LOGS": {
+      "label": "碎片碼 7",
+      "glyph": "7"
+    },
+    "fB_RECYCLE": {
+      "label": "碎片碼 4",
+      "glyph": "4"
+    },
+    "fB_DOOR": {
+      "label": "碎片碼 6",
+      "glyph": "6"
+    },
+    "fB_STAIRWATER": {
+      "label": "碎片碼 8",
+      "glyph": "8"
+    }
+  },
+  "intro": [
+    {
+      "who": "third",
+      "label": "警報",
+      "text": "一個黑洞噴發出高能量物質，扭曲了時空——校園的歷史記憶被打散成許多『時空碎片』，散落四處。"
+    },
+    {
+      "who": "first",
+      "label": "時空管理局",
+      "text": "你們是新一代『時空維護者』。循著殘留的畫面找到碎片，把過去的記憶接回正確的位置。"
+    },
+    {
+      "who": "system",
+      "label": "任務說明",
+      "text": "兩隊各走不重疊的一圈，路線會在校園四區之間穿梭。每到一個座標先穩住它、回答一段歷史記憶；碎片站會給你一個校準碼。線索是慢慢清晰的殘影，看不懂就等一下。集滿五個校準碼，回四年級教室『成長樹』布告欄校準座標。時間線是單行道，順著線索走、別亂掃。"
+    }
+  ],
+  "prologue": {
+    "intro": {
+      "who": "system",
+      "label": "出發",
+      "text": "讀第一段殘留影像，想想那是校園的哪裡，走過去穩住它。別跟著別隊跑。"
+    },
+    "fragments": {
+      "A": {
+        "img": "logo_time",
+        "startTask": "a_SIGN1925",
+        "clueText": "殘影閃過……一面牆上貼著一張寫著 1925 的公告……",
+        "clueHints": [
+          {
+            "after": 30,
+            "text": "唸快一點像『依舊愛我』，那張貼在保健室旁的公告？"
+          },
+          {
+            "after": 60,
+            "text": "1925 公告？保健室旁那張？碎片在那嗎？"
+          }
+        ]
+      },
+      "B": {
+        "img": "logo_time",
+        "startTask": "b_PLUMERIA",
+        "clueText": "一陣淡香……白色花瓣、黃色花心，在風裡飄……",
+        "clueHints": [
+          {
+            "after": 30,
+            "text": "樹上掛著吊牌、大家叫它雞蛋花的那棵？"
+          },
+          {
+            "after": 60,
+            "text": "緬梔花？雞蛋花吊牌？碎片在那嗎？"
+          }
+        ]
+      }
+    }
+  },
+  "flowMode": "conditional",
+  "groups": [
+    {
+      "id": "A",
+      "name": "維護隊 · 甲"
+    },
+    {
+      "id": "B",
+      "name": "維護隊 · 乙"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "a_SIGN1925",
+      "group": "A",
+      "name": "時空節點",
+      "trigger": {
+        "type": "qr",
+        "qr": "SIGN1925"
+      },
+      "unlock": {
+        "type": "always"
+      },
+      "narrative": [
+        {
+          "who": "first",
+          "label": "維護者直覺",
+          "text": "先穩住這個時空節點，回答它守著的一段歷史記憶。"
+        }
+      ],
+      "response": {
+        "type": "choice",
+        "prompt": "公告欄上貼著學校的通知，這些公告主要是給誰看的？",
+        "options": [
+          {
+            "id": "all",
+            "label": "全校師生大家"
+          },
+          {
+            "id": "p",
+            "label": "只有校長"
+          },
+          {
+            "id": "g",
+            "label": "只有客人"
+          }
+        ]
+      },
+      "validation": {
+        "type": "choice",
+        "value": "all",
+        "successText": "對，公告是給大家看的公共資訊。 時空碎片到手！",
+        "failText": "公告是公開給全校師生看的。"
+      },
+      "onComplete": {
+        "clueText": "叮鈴……一台要投硬幣才能打的電話，現在很少見了……",
+        "clueHints": [
+          {
+            "after": 30,
+            "text": "以前沒手機時、投幣才能打的那種公共電話？"
+          },
+          {
+            "after": 60,
+            "text": "投幣公共電話？那台老電話？碎片在那嗎？"
+          }
+        ]
+      }
+    },
+    {
+      "id": "a_PAYPHONE",
+      "group": "A",
+      "name": "時空碎片",
+      "trigger": {
+        "type": "qr",
+        "qr": "PAYPHONE"
+      },
+      "unlock": {
+        "type": "afterTasks",
+        "value": [
+          "a_SIGN1925"
+        ]
+      },
+      "lockedText": "時間線還沒接到這裡——你還缺前一段時空碎片。先依線索照順序蒐集，再回到這個座標。",
+      "narrative": [
+        {
+          "who": "third",
+          "label": "殘留影像",
+          "text": "這個座標殘留著一片時空碎片，輕輕一碰就浮現畫面。"
+        },
+        {
+          "who": "first",
+          "label": "維護者直覺",
+          "text": "記下它顯示的校準碼——"
+        }
+      ],
+      "response": {
+        "type": "number",
+        "prompt": "碎片浮現一支電話：按鍵上 0 到 9 的數字，最大的一個是幾？"
+      },
+      "validation": {
+        "type": "exact",
+        "value": "9",
+        "successText": "校準碼 9 記下！",
+        "failText": "0 到 9 裡最大的是 9。"
+      },
+      "onComplete": {
+        "clueText": "水面上……一抹白色的身影低著頭，靜靜立著……",
+        "clueHints": [
+          {
+            "after": 30,
+            "text": "一座養著水草、邊上有低頭白鷺雕像的水池？"
+          },
+          {
+            "after": 60,
+            "text": "白鷺水生池？那座雕像旁？碎片在那嗎？"
+          }
+        ],
+        "give": "fA_PAYPHONE"
+      }
+    },
+    {
+      "id": "a_HERON",
+      "group": "A",
+      "name": "時空節點",
+      "trigger": {
+        "type": "qr",
+        "qr": "HERON"
+      },
+      "unlock": {
+        "type": "afterTasks",
+        "value": [
+          "a_PAYPHONE"
+        ]
+      },
+      "lockedText": "時間線還沒接到這裡——你還缺前一段時空碎片。先依線索照順序蒐集，再回到這個座標。",
+      "narrative": [
+        {
+          "who": "first",
+          "label": "維護者直覺",
+          "text": "先穩住這個時空節點，回答它守著的一段歷史記憶。"
+        }
+      ],
+      "response": {
+        "type": "choice",
+        "prompt": "白鷺是水邊的鳥。為了讓動物有家，我們該怎麼對待校園池塘？",
+        "options": [
+          {
+            "id": "clean",
+            "label": "保持乾淨愛護"
+          },
+          {
+            "id": "trash",
+            "label": "亂丟垃圾"
+          },
+          {
+            "id": "drain",
+            "label": "把水放掉"
+          }
+        ]
+      },
+      "validation": {
+        "type": "choice",
+        "value": "clean",
+        "successText": "對，要保持乾淨、愛護環境。 時空碎片到手！",
+        "failText": "要保持池塘乾淨，動物才有家。"
+      },
+      "onComplete": {
+        "clueText": "太陽從一根柱子後升起，灑進一座小亭子……",
+        "clueHints": [
+          {
+            "after": 30,
+            "text": "校園南邊遮陽的亭子、柱子正對著日出（東）？"
+          },
+          {
+            "after": 60,
+            "text": "南方涼亭？朝東的柱子？碎片在那嗎？"
+          }
+        ]
+      }
+    },
+    {
+      "id": "a_PAVILION",
+      "group": "A",
+      "name": "時空碎片",
+      "trigger": {
+        "type": "qr",
+        "qr": "PAVILION"
+      },
+      "unlock": {
+        "type": "afterTasks",
+        "value": [
+          "a_HERON"
+        ]
+      },
+      "lockedText": "時間線還沒接到這裡——你還缺前一段時空碎片。先依線索照順序蒐集，再回到這個座標。",
+      "narrative": [
+        {
+          "who": "third",
+          "label": "殘留影像",
+          "text": "這個座標殘留著一片時空碎片，輕輕一碰就浮現畫面。"
+        },
+        {
+          "who": "first",
+          "label": "維護者直覺",
+          "text": "記下它顯示的校準碼——"
+        }
+      ],
+      "response": {
+        "type": "number",
+        "prompt": "碎片浮現一個羅盤：地圖主要方位『東、南、西、北』，共有幾個？"
+      },
+      "validation": {
+        "type": "exact",
+        "value": "4",
+        "successText": "校準碼 4 記下！",
+        "failText": "東、南、西、北，共 4 個。"
+      },
+      "onComplete": {
+        "clueText": "一陣果香……切開來，剖面竟然像一顆星星……",
+        "clueHints": [
+          {
+            "after": 30,
+            "text": "一棵結著黃色果實、切面像五角星的樹？"
+          },
+          {
+            "after": 60,
+            "text": "楊桃樹？那棵星星果實的樹？碎片在樹下嗎？"
+          }
+        ],
+        "give": "fA_PAVILION"
+      }
+    },
+    {
+      "id": "a_STARFRUIT",
+      "group": "A",
+      "name": "時空節點",
+      "trigger": {
+        "type": "qr",
+        "qr": "STARFRUIT"
+      },
+      "unlock": {
+        "type": "afterTasks",
+        "value": [
+          "a_PAVILION"
+        ]
+      },
+      "lockedText": "時間線還沒接到這裡——你還缺前一段時空碎片。先依線索照順序蒐集，再回到這個座標。",
+      "narrative": [
+        {
+          "who": "first",
+          "label": "維護者直覺",
+          "text": "先穩住這個時空節點，回答它守著的一段歷史記憶。"
+        }
+      ],
+      "response": {
+        "type": "choice",
+        "prompt": "楊桃是在地的水果，由哪種人種出來再賣給我們？",
+        "options": [
+          {
+            "id": "farmer",
+            "label": "農夫"
+          },
+          {
+            "id": "doctor",
+            "label": "醫生"
+          },
+          {
+            "id": "police",
+            "label": "警察"
+          }
+        ]
+      },
+      "validation": {
+        "type": "choice",
+        "value": "farmer",
+        "successText": "對，是農夫種的（生產者）。 時空碎片到手！",
+        "failText": "水果是農夫種出來的。"
+      },
+      "onComplete": {
+        "clueText": "嗡嗡嗡……一群小果蠅圍著一陣果香打轉……",
+        "clueHints": [
+          {
+            "after": 30,
+            "text": "一棵結實累累、套著保護袋、旁邊有廚餘味的樹？"
+          },
+          {
+            "after": 60,
+            "text": "木瓜樹？廚餘桶旁？碎片在那嗎？"
+          }
+        ]
+      }
+    },
+    {
+      "id": "a_PAPAYA",
+      "group": "A",
+      "name": "時空碎片",
+      "trigger": {
+        "type": "qr",
+        "qr": "PAPAYA"
+      },
+      "unlock": {
+        "type": "afterTasks",
+        "value": [
+          "a_STARFRUIT"
+        ]
+      },
+      "lockedText": "時間線還沒接到這裡——你還缺前一段時空碎片。先依線索照順序蒐集，再回到這個座標。",
+      "narrative": [
+        {
+          "who": "third",
+          "label": "殘留影像",
+          "text": "這個座標殘留著一片時空碎片，輕輕一碰就浮現畫面。"
+        },
+        {
+          "who": "first",
+          "label": "維護者直覺",
+          "text": "記下它顯示的校準碼——"
+        }
+      ],
+      "response": {
+        "type": "number",
+        "prompt": "碎片浮現一座紅綠燈：燈號有紅、黃、綠，共幾種顏色？"
+      },
+      "validation": {
+        "type": "exact",
+        "value": "3",
+        "successText": "校準碼 3 記下！",
+        "failText": "紅、黃、綠，共 3 種。"
+      },
+      "onComplete": {
+        "clueText": "一面色彩鮮豔的牆，畫著部落的圖案……",
+        "clueHints": [
+          {
+            "after": 30,
+            "text": "貼著『部落繪畫比賽』作品的那面布告欄？"
+          },
+          {
+            "after": 60,
+            "text": "部落繪畫布告欄？那面牆？碎片在那嗎？"
+          }
+        ],
+        "give": "fA_PAPAYA"
+      }
+    },
+    {
+      "id": "a_TRIBEART",
+      "group": "A",
+      "name": "時空節點",
+      "trigger": {
+        "type": "qr",
+        "qr": "TRIBEART"
+      },
+      "unlock": {
+        "type": "afterTasks",
+        "value": [
+          "a_PAPAYA"
+        ]
+      },
+      "lockedText": "時間線還沒接到這裡——你還缺前一段時空碎片。先依線索照順序蒐集，再回到這個座標。",
+      "narrative": [
+        {
+          "who": "first",
+          "label": "維護者直覺",
+          "text": "先穩住這個時空節點，回答它守著的一段歷史記憶。"
+        }
+      ],
+      "response": {
+        "type": "choice",
+        "prompt": "布告欄展示『部落繪畫』作品，這和認識什麼最有關？",
+        "options": [
+          {
+            "id": "home",
+            "label": "家鄉的文化"
+          },
+          {
+            "id": "foreign",
+            "label": "外國的節日"
+          },
+          {
+            "id": "space",
+            "label": "太空科學"
+          }
+        ]
+      },
+      "validation": {
+        "type": "choice",
+        "value": "home",
+        "successText": "對，是認識家鄉與在地文化。 時空碎片到手！",
+        "failText": "部落繪畫和家鄉、在地文化有關。"
+      },
+      "onComplete": {
+        "clueText": "一股樟腦清香，從圍牆邊一棵大樹飄來……",
+        "clueHints": [
+          {
+            "after": 30,
+            "text": "樹幹長到一半分岔成兩股、像 Y 字的大樹？"
+          },
+          {
+            "after": 60,
+            "text": "開岔的樟樹？圍牆旁？碎片在那嗎？"
+          }
+        ]
+      }
+    },
+    {
+      "id": "a_CAMPHOR",
+      "group": "A",
+      "name": "時空碎片",
+      "trigger": {
+        "type": "either",
+        "gps": {
+          "lat": 22.6875519,
+          "lng": 121.0444092,
+          "radius": 25
+        },
+        "qr": "CAMPHOR"
+      },
+      "unlock": {
+        "type": "afterTasks",
+        "value": [
+          "a_TRIBEART"
+        ]
+      },
+      "lockedText": "時間線還沒接到這裡——你還缺前一段時空碎片。先依線索照順序蒐集，再回到這個座標。",
+      "narrative": [
+        {
+          "who": "third",
+          "label": "殘留影像",
+          "text": "這個座標殘留著一片時空碎片，輕輕一碰就浮現畫面。"
+        },
+        {
+          "who": "first",
+          "label": "維護者直覺",
+          "text": "記下它顯示的校準碼——"
+        }
+      ],
+      "response": {
+        "type": "number",
+        "prompt": "碎片浮現一張月曆：一星期從星期一到星期日，共有幾天？"
+      },
+      "validation": {
+        "type": "exact",
+        "value": "7",
+        "successText": "校準碼 7 記下！",
+        "failText": "一星期共 7 天。"
+      },
+      "onComplete": {
+        "clueText": "操場上一排架子，有高有矮地站著……",
+        "clueHints": [
+          {
+            "after": 30,
+            "text": "其中個子最矮、籃框最好投的那一座？"
+          },
+          {
+            "after": 60,
+            "text": "最矮的籃球架？碎片在它下面嗎？"
+          }
+        ],
+        "give": "fA_CAMPHOR"
+      }
+    },
+    {
+      "id": "a_HOOP",
+      "group": "A",
+      "name": "時空節點",
+      "trigger": {
+        "type": "either",
+        "gps": {
+          "lat": 22.6880741,
+          "lng": 121.0449738,
+          "radius": 25
+        },
+        "qr": "HOOP"
+      },
+      "unlock": {
+        "type": "afterTasks",
+        "value": [
+          "a_CAMPHOR"
+        ]
+      },
+      "lockedText": "時間線還沒接到這裡——你還缺前一段時空碎片。先依線索照順序蒐集，再回到這個座標。",
+      "narrative": [
+        {
+          "who": "first",
+          "label": "維護者直覺",
+          "text": "先穩住這個時空節點，回答它守著的一段歷史記憶。"
+        }
+      ],
+      "response": {
+        "type": "choice",
+        "prompt": "操場是大家共用的地方，玩球時怎麼做才安全又有公德？",
+        "options": [
+          {
+            "id": "share",
+            "label": "輪流、守規則"
+          },
+          {
+            "id": "push",
+            "label": "推擠搶球"
+          },
+          {
+            "id": "hog",
+            "label": "獨占球場"
+          }
+        ]
+      },
+      "validation": {
+        "type": "choice",
+        "value": "share",
+        "successText": "對，要輪流、守規則。 時空碎片到手！",
+        "failText": "公共場所要輪流、守規則。"
+      },
+      "onComplete": {
+        "clueText": "殘影浮現……一張貼在牆上、寫著今天吃什麼的單子……",
+        "clueHints": [
+          {
+            "after": 30,
+            "text": "中午前大家會看的那張、列出今日飯菜的公告？"
+          },
+          {
+            "after": 60,
+            "text": "午餐菜單公告？走廊那張？碎片在那嗎？"
+          }
+        ]
+      }
+    },
+    {
+      "id": "a_LUNCH",
+      "group": "A",
+      "name": "時空碎片",
+      "trigger": {
+        "type": "qr",
+        "qr": "LUNCH"
+      },
+      "unlock": {
+        "type": "afterTasks",
+        "value": [
+          "a_HOOP"
+        ]
+      },
+      "lockedText": "時間線還沒接到這裡——你還缺前一段時空碎片。先依線索照順序蒐集，再回到這個座標。",
+      "narrative": [
+        {
+          "who": "third",
+          "label": "殘留影像",
+          "text": "這個座標殘留著一片時空碎片，輕輕一碰就浮現畫面。"
+        },
+        {
+          "who": "first",
+          "label": "維護者直覺",
+          "text": "記下它顯示的校準碼——"
+        }
+      ],
+      "response": {
+        "type": "number",
+        "prompt": "碎片浮現一隻手：一隻手有幾根手指頭？"
+      },
+      "validation": {
+        "type": "exact",
+        "value": "5",
+        "successText": "校準碼 5 記下，五片碎片到齊！",
+        "failText": "一隻手有 5 根手指。"
+      },
+      "onComplete": {
+        "clueText": "碎片到齊了！時間線收攏，指向你們最熟悉的地方……",
+        "clueHints": [
+          {
+            "after": 30,
+            "text": "腦海浮現一面布告欄，上面有一棵正在長大的樹……"
+          },
+          {
+            "after": 60,
+            "text": "成長樹布告欄？回四年級教室校準座標！"
+          }
+        ],
+        "give": "fA_LUNCH"
+      }
+    },
+    {
+      "id": "core_A",
+      "group": "A",
+      "name": "時空基地 · 成長樹控制台",
+      "trigger": {
+        "type": "qr",
+        "qr": "BASE"
+      },
+      "unlock": {
+        "type": "requiresItems",
+        "value": [
+          "fA_PAYPHONE",
+          "fA_PAVILION",
+          "fA_PAPAYA",
+          "fA_CAMPHOR",
+          "fA_LUNCH"
+        ]
+      },
+      "lockedText": "五片時空碎片還沒到齊，控制台無法啟動——先把散落的碎片找回來。",
+      "narrative": [
+        {
+          "who": "system",
+          "label": "時空管理局",
+          "text": "甲隊五片碎片就位。"
+        },
+        {
+          "who": "first",
+          "label": "維護者直覺",
+          "text": "把校準碼由小到大排成數字，輸入控制台。"
+        }
+      ],
+      "hints": [
+        {
+          "after": 25,
+          "who": "first",
+          "label": "維護者直覺",
+          "text": "由小到大：3、4、5、7、9。"
+        },
+        {
+          "after": 55,
+          "who": "first",
+          "label": "維護者直覺",
+          "text": "校準碼是 34579。"
+        }
+      ],
+      "response": {
+        "type": "number",
+        "prompt": "把 9、4、3、7、5 由小到大排好，校準座標："
+      },
+      "validation": {
+        "type": "exact",
+        "value": "34579",
+        "successText": "座標校準完成，時間線修復！",
+        "failText": "由小到大：3、4、5、7、9。"
+      },
+      "onComplete": {
+        "end": true
+      }
+    },
+    {
+      "id": "b_PLUMERIA",
+      "group": "B",
+      "name": "時空節點",
+      "trigger": {
+        "type": "qr",
+        "qr": "PLUMERIA"
+      },
+      "unlock": {
+        "type": "always"
+      },
+      "narrative": [
+        {
+          "who": "first",
+          "label": "維護者直覺",
+          "text": "先穩住這個時空節點，回答它守著的一段歷史記憶。"
+        }
+      ],
+      "response": {
+        "type": "keywords",
+        "prompt": "看吊牌：緬梔花的俗稱是什麼花？（三個字）"
+      },
+      "validation": {
+        "type": "keywords",
+        "value": [
+          "雞蛋花"
+        ],
+        "successText": "對，俗稱雞蛋花。 時空碎片到手！",
+        "failText": "緬梔花俗稱『雞蛋花』。"
+      },
+      "onComplete": {
+        "clueText": "好安靜……進門前居然還要先脫鞋……",
+        "clueHints": [
+          {
+            "after": 30,
+            "text": "滿是書、要安靜、要脫鞋才能進的房間？"
+          },
+          {
+            "after": 60,
+            "text": "圖書館？那間要脫鞋的？碎片在書架間嗎？"
+          }
+        ]
+      }
+    },
+    {
+      "id": "b_LIBRARY",
+      "group": "B",
+      "name": "時空碎片",
+      "trigger": {
+        "type": "qr",
+        "qr": "LIBRARY"
+      },
+      "unlock": {
+        "type": "afterTasks",
+        "value": [
+          "b_PLUMERIA"
+        ]
+      },
+      "lockedText": "時間線還沒接到這裡——你還缺前一段時空碎片。先依線索照順序蒐集，再回到這個座標。",
+      "narrative": [
+        {
+          "who": "third",
+          "label": "殘留影像",
+          "text": "這個座標殘留著一片時空碎片，輕輕一碰就浮現畫面。"
+        },
+        {
+          "who": "first",
+          "label": "維護者直覺",
+          "text": "記下它顯示的校準碼——"
+        }
+      ],
+      "response": {
+        "type": "number",
+        "prompt": "碎片浮現一雙鞋（進圖書館要脫鞋）：一雙鞋有幾隻？"
+      },
+      "validation": {
+        "type": "exact",
+        "value": "2",
+        "successText": "校準碼 2 記下！",
+        "failText": "一雙就是 2 隻。"
+      },
+      "onComplete": {
+        "clueText": "一個又高又直的影子，像一個站著的『1』……",
+        "clueHints": [
+          {
+            "after": 30,
+            "text": "每天上學第一個經過、全校最大的那道門？"
+          },
+          {
+            "after": 60,
+            "text": "校門口？像 1 的大門？碎片在那嗎？"
+          }
+        ],
+        "give": "fB_LIBRARY"
+      }
+    },
+    {
+      "id": "b_GATE",
+      "group": "B",
+      "name": "時空節點",
+      "trigger": {
+        "type": "either",
+        "gps": {
+          "lat": 22.6876587,
+          "lng": 121.0450066,
+          "radius": 25
+        },
+        "qr": "GATE"
+      },
+      "unlock": {
+        "type": "afterTasks",
+        "value": [
+          "b_LIBRARY"
+        ]
+      },
+      "lockedText": "時間線還沒接到這裡——你還缺前一段時空碎片。先依線索照順序蒐集，再回到這個座標。",
+      "narrative": [
+        {
+          "who": "first",
+          "label": "維護者直覺",
+          "text": "先穩住這個時空節點，回答它守著的一段歷史記憶。"
+        }
+      ],
+      "response": {
+        "type": "choice",
+        "prompt": "校門口每天有導護老師和志工，他們主要做什麼？",
+        "options": [
+          {
+            "id": "safe",
+            "label": "維護上下學安全"
+          },
+          {
+            "id": "sell",
+            "label": "賣東西"
+          },
+          {
+            "id": "clean",
+            "label": "打掃"
+          }
+        ]
+      },
+      "validation": {
+        "type": "choice",
+        "value": "safe",
+        "successText": "對，維護上下學交通安全。 時空碎片到手！",
+        "failText": "導護是維護上下學安全。"
+      },
+      "onComplete": {
+        "clueText": "一塊匾額，寫著和『讀書』有關的四個字……",
+        "clueHints": [
+          {
+            "after": 30,
+            "text": "『書香滿室』牌子下方，堆著鋸下的樹幹？"
+          },
+          {
+            "after": 60,
+            "text": "書香滿室？樹幹堆？碎片在那嗎？"
+          }
+        ]
+      }
+    },
+    {
+      "id": "b_LOGS",
+      "group": "B",
+      "name": "時空碎片",
+      "trigger": {
+        "type": "qr",
+        "qr": "LOGS"
+      },
+      "unlock": {
+        "type": "afterTasks",
+        "value": [
+          "b_GATE"
+        ]
+      },
+      "lockedText": "時間線還沒接到這裡——你還缺前一段時空碎片。先依線索照順序蒐集，再回到這個座標。",
+      "narrative": [
+        {
+          "who": "third",
+          "label": "殘留影像",
+          "text": "這個座標殘留著一片時空碎片，輕輕一碰就浮現畫面。"
+        },
+        {
+          "who": "first",
+          "label": "維護者直覺",
+          "text": "記下它顯示的校準碼——"
+        }
+      ],
+      "response": {
+        "type": "number",
+        "prompt": "碎片浮現彩虹：彩虹有幾種顏色？"
+      },
+      "validation": {
+        "type": "exact",
+        "value": "7",
+        "successText": "校準碼 7 記下！",
+        "failText": "彩虹有 7 種顏色。"
+      },
+      "onComplete": {
+        "clueText": "好多椅子排排坐，前面一面大螢幕……週一最熱鬧……",
+        "clueHints": [
+          {
+            "after": 30,
+            "text": "週一早晨全班來開朝會、看影片的那間？"
+          },
+          {
+            "after": 60,
+            "text": "視聽教室？週一朝會的地方？碎片在那嗎？"
+          }
+        ],
+        "give": "fB_LOGS"
+      }
+    },
+    {
+      "id": "b_AVROOM",
+      "group": "B",
+      "name": "時空節點",
+      "trigger": {
+        "type": "qr",
+        "qr": "AVROOM"
+      },
+      "unlock": {
+        "type": "afterTasks",
+        "value": [
+          "b_LOGS"
+        ]
+      },
+      "lockedText": "時間線還沒接到這裡——你還缺前一段時空碎片。先依線索照順序蒐集，再回到這個座標。",
+      "narrative": [
+        {
+          "who": "first",
+          "label": "維護者直覺",
+          "text": "先穩住這個時空節點，回答它守著的一段歷史記憶。"
+        }
+      ],
+      "response": {
+        "type": "choice",
+        "prompt": "週一朝會升旗時，怎麼做最有禮貌？",
+        "options": [
+          {
+            "id": "stand",
+            "label": "立正、安靜"
+          },
+          {
+            "id": "chat",
+            "label": "邊走邊聊"
+          },
+          {
+            "id": "phone",
+            "label": "低頭玩手機"
+          }
+        ]
+      },
+      "validation": {
+        "type": "choice",
+        "value": "stand",
+        "successText": "對，立正、安靜。 時空碎片到手！",
+        "failText": "升旗要立正、安靜。"
+      },
+      "onComplete": {
+        "clueText": "叮叮咚咚……瓶罐互相碰撞的聲音，循聲走過去……",
+        "clueHints": [
+          {
+            "after": 30,
+            "text": "廚房後面，把瓶罐紙箱分類堆放的房間？"
+          },
+          {
+            "after": 60,
+            "text": "資源回收室？那間分類的？碎片在那嗎？"
+          }
+        ]
+      }
+    },
+    {
+      "id": "b_RECYCLE",
+      "group": "B",
+      "name": "時空碎片",
+      "trigger": {
+        "type": "qr",
+        "qr": "RECYCLE"
+      },
+      "unlock": {
+        "type": "afterTasks",
+        "value": [
+          "b_AVROOM"
+        ]
+      },
+      "lockedText": "時間線還沒接到這裡——你還缺前一段時空碎片。先依線索照順序蒐集，再回到這個座標。",
+      "narrative": [
+        {
+          "who": "third",
+          "label": "殘留影像",
+          "text": "這個座標殘留著一片時空碎片，輕輕一碰就浮現畫面。"
+        },
+        {
+          "who": "first",
+          "label": "維護者直覺",
+          "text": "記下它顯示的校準碼——"
+        }
+      ],
+      "response": {
+        "type": "number",
+        "prompt": "碎片浮現回收桶：資源回收常分『紙、塑膠、鐵鋁罐、玻璃』，共幾類？"
+      },
+      "validation": {
+        "type": "exact",
+        "value": "4",
+        "successText": "校準碼 4 記下！",
+        "failText": "紙、塑膠、鐵鋁罐、玻璃，共 4 類。"
+      },
+      "onComplete": {
+        "clueText": "喀噠喀噠……鍵盤和滑鼠的聲音此起彼落……",
+        "clueHints": [
+          {
+            "after": 30,
+            "text": "一排排電腦、上課時敲鍵盤的教室？"
+          },
+          {
+            "after": 60,
+            "text": "電腦教室？那間打鍵盤的？碎片在那嗎？"
+          }
+        ],
+        "give": "fB_RECYCLE"
+      }
+    },
+    {
+      "id": "b_COMPUTER",
+      "group": "B",
+      "name": "時空節點",
+      "trigger": {
+        "type": "qr",
+        "qr": "COMPUTER"
+      },
+      "unlock": {
+        "type": "afterTasks",
+        "value": [
+          "b_RECYCLE"
+        ]
+      },
+      "lockedText": "時間線還沒接到這裡——你還缺前一段時空碎片。先依線索照順序蒐集，再回到這個座標。",
+      "narrative": [
+        {
+          "who": "first",
+          "label": "維護者直覺",
+          "text": "先穩住這個時空節點，回答它守著的一段歷史記憶。"
+        }
+      ],
+      "response": {
+        "type": "choice",
+        "prompt": "電腦、手機是現代的工具。以前的人想和遠方的人聯絡，常用什麼？",
+        "options": [
+          {
+            "id": "letter",
+            "label": "寫信"
+          },
+          {
+            "id": "net",
+            "label": "上網"
+          },
+          {
+            "id": "app",
+            "label": "傳手機訊息"
+          }
+        ]
+      },
+      "validation": {
+        "type": "choice",
+        "value": "letter",
+        "successText": "對，以前常用寫信（工具會演變）。 時空碎片到手！",
+        "failText": "以前沒網路手機，常用寫信聯絡。"
+      },
+      "onComplete": {
+        "clueText": "走廊盡頭，一片黃色映入眼簾……",
+        "clueHints": [
+          {
+            "after": 30,
+            "text": "花架走廊走到底，一間教室拉門上貼著黃色壁報紙？"
+          },
+          {
+            "after": 60,
+            "text": "黃色壁報拉門？那扇門？碎片在那嗎？"
+          }
+        ]
+      }
+    },
+    {
+      "id": "b_DOOR",
+      "group": "B",
+      "name": "時空碎片",
+      "trigger": {
+        "type": "qr",
+        "qr": "DOOR"
+      },
+      "unlock": {
+        "type": "afterTasks",
+        "value": [
+          "b_COMPUTER"
+        ]
+      },
+      "lockedText": "時間線還沒接到這裡——你還缺前一段時空碎片。先依線索照順序蒐集，再回到這個座標。",
+      "narrative": [
+        {
+          "who": "third",
+          "label": "殘留影像",
+          "text": "這個座標殘留著一片時空碎片，輕輕一碰就浮現畫面。"
+        },
+        {
+          "who": "first",
+          "label": "維護者直覺",
+          "text": "記下它顯示的校準碼——"
+        }
+      ],
+      "response": {
+        "type": "number",
+        "prompt": "碎片浮現一盒蠟筆：紅、橙、黃、綠、藍、紫，共幾個顏色？"
+      },
+      "validation": {
+        "type": "exact",
+        "value": "6",
+        "successText": "校準碼 6 記下！",
+        "failText": "紅橙黃綠藍紫，共 6 個。"
+      },
+      "onComplete": {
+        "clueText": "潺潺水聲……魚在游，旁邊竟然長著菜……",
+        "clueHints": [
+          {
+            "after": 30,
+            "text": "上面種菜、下面養魚、在二樓樓梯轉角的裝置？"
+          },
+          {
+            "after": 60,
+            "text": "魚菜共生？二樓轉角？碎片在那嗎？"
+          }
+        ],
+        "give": "fB_DOOR"
+      }
+    },
+    {
+      "id": "b_FISH",
+      "group": "B",
+      "name": "時空節點",
+      "trigger": {
+        "type": "qr",
+        "qr": "FISH"
+      },
+      "unlock": {
+        "type": "afterTasks",
+        "value": [
+          "b_DOOR"
+        ]
+      },
+      "lockedText": "時間線還沒接到這裡——你還缺前一段時空碎片。先依線索照順序蒐集，再回到這個座標。",
+      "narrative": [
+        {
+          "who": "first",
+          "label": "維護者直覺",
+          "text": "先穩住這個時空節點，回答它守著的一段歷史記憶。"
+        }
+      ],
+      "response": {
+        "type": "choice",
+        "prompt": "魚菜共生讓魚和菜一起長、循環利用，這是愛護什麼的好點子？",
+        "options": [
+          {
+            "id": "env",
+            "label": "珍惜資源愛護環境"
+          },
+          {
+            "id": "waste",
+            "label": "浪費水"
+          },
+          {
+            "id": "trash",
+            "label": "製造垃圾"
+          }
+        ]
+      },
+      "validation": {
+        "type": "choice",
+        "value": "env",
+        "successText": "對，珍惜資源、愛護環境。 時空碎片到手！",
+        "failText": "魚菜共生是珍惜資源、愛護環境。"
+      },
+      "onComplete": {
+        "clueText": "嘩啦……水流聲，就在上下樓的地方旁邊……",
+        "clueHints": [
+          {
+            "after": 30,
+            "text": "樓梯旁那台大家排隊裝水喝的機器？"
+          },
+          {
+            "after": 60,
+            "text": "樓梯旁的飲水機？碎片在那嗎？"
+          }
+        ]
+      }
+    },
+    {
+      "id": "b_STAIRWATER",
+      "group": "B",
+      "name": "時空碎片",
+      "trigger": {
+        "type": "qr",
+        "qr": "STAIRWATER"
+      },
+      "unlock": {
+        "type": "afterTasks",
+        "value": [
+          "b_FISH"
+        ]
+      },
+      "lockedText": "時間線還沒接到這裡——你還缺前一段時空碎片。先依線索照順序蒐集，再回到這個座標。",
+      "narrative": [
+        {
+          "who": "third",
+          "label": "殘留影像",
+          "text": "這個座標殘留著一片時空碎片，輕輕一碰就浮現畫面。"
+        },
+        {
+          "who": "first",
+          "label": "維護者直覺",
+          "text": "記下它顯示的校準碼——"
+        }
+      ],
+      "response": {
+        "type": "number",
+        "prompt": "碎片浮現一隻章魚：章魚有幾隻腳？"
+      },
+      "validation": {
+        "type": "exact",
+        "value": "8",
+        "successText": "校準碼 8 記下，五片碎片到齊！",
+        "failText": "章魚有 8 隻腳。"
+      },
+      "onComplete": {
+        "clueText": "碎片到齊了！時間線收攏，指向你們最熟悉的地方……",
+        "clueHints": [
+          {
+            "after": 30,
+            "text": "腦海浮現一面布告欄，上面有一棵正在長大的樹……"
+          },
+          {
+            "after": 60,
+            "text": "成長樹布告欄？回四年級教室校準座標！"
+          }
+        ],
+        "give": "fB_STAIRWATER"
+      }
+    },
+    {
+      "id": "core_B",
+      "group": "B",
+      "name": "時空基地 · 成長樹控制台",
+      "trigger": {
+        "type": "qr",
+        "qr": "BASE"
+      },
+      "unlock": {
+        "type": "requiresItems",
+        "value": [
+          "fB_LIBRARY",
+          "fB_LOGS",
+          "fB_RECYCLE",
+          "fB_DOOR",
+          "fB_STAIRWATER"
+        ]
+      },
+      "lockedText": "五片時空碎片還沒到齊，控制台無法啟動——先把散落的碎片找回來。",
+      "narrative": [
+        {
+          "who": "system",
+          "label": "時空管理局",
+          "text": "乙隊五片碎片就位。"
+        },
+        {
+          "who": "first",
+          "label": "維護者直覺",
+          "text": "把校準碼由小到大排成數字，輸入控制台。"
+        }
+      ],
+      "hints": [
+        {
+          "after": 25,
+          "who": "first",
+          "label": "維護者直覺",
+          "text": "由小到大：2、4、6、7、8。"
+        },
+        {
+          "after": 55,
+          "who": "first",
+          "label": "維護者直覺",
+          "text": "校準碼是 24678。"
+        }
+      ],
+      "response": {
+        "type": "number",
+        "prompt": "把 2、7、4、6、8 由小到大排好，校準座標："
+      },
+      "validation": {
+        "type": "exact",
+        "value": "24678",
+        "successText": "座標校準完成，時間線修復！",
+        "failText": "由小到大：2、4、6、7、8。"
+      },
+      "onComplete": {
+        "end": true
+      }
+    },
+    {
+      "id": "d_map0",
+      "name": "畫有世界地圖的牆",
+      "trigger": {
+        "type": "qr",
+        "qr": "MAP0"
+      },
+      "unlock": {
+        "type": "always"
+      },
+      "narrative": [
+        {
+          "who": "first",
+          "label": "時空管理局",
+          "text": "只有一幅世界地圖，時間線在這裡很平穩，沒有碎片。你大概是亂掃才被引來。"
+        }
+      ],
+      "response": {
+        "type": "info",
+        "prompt": "（這裡沒有碎片。回線索簿，照殘影再想一次。）"
+      },
+      "validation": {
+        "type": "none",
+        "successText": "你空手離開，回到正軌。"
+      },
+      "onComplete": {}
+    },
+    {
+      "id": "d_pole0",
+      "name": "沒有旗幟的旗杆",
+      "trigger": {
+        "type": "qr",
+        "qr": "POLE0"
+      },
+      "unlock": {
+        "type": "always"
+      },
+      "narrative": [
+        {
+          "who": "first",
+          "label": "時空管理局",
+          "text": "一根光禿禿、沒掛旗子的旗杆，這裡沒有碎片。"
+        }
+      ],
+      "response": {
+        "type": "info",
+        "prompt": "（這裡沒有碎片。回線索簿，照殘影再想一次。）"
+      },
+      "validation": {
+        "type": "none",
+        "successText": "你空手離開，回到正軌。"
+      },
+      "onComplete": {}
+    },
+    {
+      "id": "d_board0",
+      "name": "司令台後空白布告欄",
+      "trigger": {
+        "type": "qr",
+        "qr": "BOARD0"
+      },
+      "unlock": {
+        "type": "always"
+      },
+      "narrative": [
+        {
+          "who": "first",
+          "label": "時空管理局",
+          "text": "一面空白的布告欄，什麼都沒貼，留不住碎片。"
+        }
+      ],
+      "response": {
+        "type": "info",
+        "prompt": "（這裡沒有碎片。回線索簿，照殘影再想一次。）"
+      },
+      "validation": {
+        "type": "none",
+        "successText": "你空手離開，回到正軌。"
+      },
+      "onComplete": {}
+    },
+    {
+      "id": "d_water0",
+      "name": "綜合教室淘汰的飲水機",
+      "trigger": {
+        "type": "qr",
+        "qr": "WATER0"
+      },
+      "unlock": {
+        "type": "always"
+      },
+      "narrative": [
+        {
+          "who": "first",
+          "label": "時空管理局",
+          "text": "早就淘汰停用的飲水機，乾乾的，沒有碎片。"
+        }
+      ],
+      "response": {
+        "type": "info",
+        "prompt": "（這裡沒有碎片。回線索簿，照殘影再想一次。）"
+      },
+      "validation": {
+        "type": "none",
+        "successText": "你空手離開，回到正軌。"
+      },
+      "onComplete": {}
+    },
+    {
+      "id": "d_ac0",
+      "name": "四年級冷氣室外機",
+      "trigger": {
+        "type": "qr",
+        "qr": "AC0"
+      },
+      "unlock": {
+        "type": "always"
+      },
+      "narrative": [
+        {
+          "who": "first",
+          "label": "時空管理局",
+          "text": "嗡嗡作響的室外機——那是機器聲，不是時空波動。"
+        }
+      ],
+      "response": {
+        "type": "info",
+        "prompt": "（這裡沒有碎片。回線索簿，照殘影再想一次。）"
+      },
+      "validation": {
+        "type": "none",
+        "successText": "你空手離開，回到正軌。"
+      },
+      "onComplete": {}
+    },
+    {
+      "id": "d_lemon0",
+      "name": "帶刺的檸檬樹",
+      "trigger": {
+        "type": "qr",
+        "qr": "LEMON0"
+      },
+      "unlock": {
+        "type": "always"
+      },
+      "narrative": [
+        {
+          "who": "first",
+          "label": "時空管理局",
+          "text": "一棵長滿尖刺的檸檬樹——小心刺，這裡也沒有碎片。"
+        }
+      ],
+      "response": {
+        "type": "info",
+        "prompt": "（這裡沒有碎片。回線索簿，照殘影再想一次。）"
+      },
+      "validation": {
+        "type": "none",
+        "successText": "你空手離開，回到正軌。"
+      },
+      "onComplete": {}
+    }
+  ],
+  "ending": [
+    {
+      "who": "first",
+      "label": "時空管理局 · 結案",
+      "text": "碎片各歸其位，時間線重新接上。原來校園的每個角落，都藏著一段值得記住的歷史。"
+    },
+    {
+      "who": "third",
+      "label": "維護者 · 結語",
+      "text": "任務完成。最厲害的時空維護，其實是好好認識自己生活的地方。"
+    },
+    {
+      "who": "system",
+      "label": "任務完成",
+      "text": "（老師：剛剛練到了家鄉產業與生產者、公民禮儀與規則、公共設施與服務、家鄉文化、地圖方位、交通號誌、資源回收，以及生活工具的演變。）"
+    }
+  ]
+}

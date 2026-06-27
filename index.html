@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>時空維護者 · 定位闖關引擎</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+TC:wght@400;500;700&family=Cinzel:wght@600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --abyss:#0e0b1a;--deep:#191333;--teal:#2e2a5e;--aqua:#5b46c4;
+  --glow:#7fe0ff;--gold:#d9a531;--foam:#ece9f7;--muted:#9890b8;--danger:#e07a6a;
+  --serif:"Noto Serif TC","Source Han Serif TC","Songti TC",serif;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:var(--sans);color:var(--foam);background:var(--abyss);line-height:1.7;overflow-x:hidden;position:relative}
+#sea{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(120% 80% at 50% -10%, #2a2160 0%, var(--deep) 42%, var(--abyss) 82%)}
+#sea::after{content:"";position:absolute;inset:0;background:radial-gradient(60% 40% at 50% 0%, rgba(127,224,255,.09), transparent 70%);animation:caustic 9s ease-in-out infinite}
+@keyframes caustic{0%,100%{opacity:.5;transform:translateY(0)}50%{opacity:.9;transform:translateY(10px)}}
+.bubble{position:fixed;bottom:-40px;border-radius:50%;z-index:0;pointer-events:none;background:radial-gradient(circle at 35% 30%, rgba(217,165,49,.22), rgba(143,182,201,.05) 60%, transparent 70%);animation:rise linear infinite}
+@keyframes rise{to{transform:translateY(-110vh) translateX(var(--dx,0));opacity:0}}
+#app{position:relative;z-index:2;max-width:680px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding:0 20px 40px}
+#bar{position:sticky;top:0;z-index:5;display:none;align-items:center;gap:10px;padding:12px 14px;margin:0 -20px 18px;background:linear-gradient(var(--abyss),rgba(7,26,43,.86));border-bottom:1px solid rgba(95,227,208,.18);backdrop-filter:blur(6px)}
+#bar .crew{font-family:var(--serif);font-weight:700;font-size:15px;letter-spacing:.5px;min-width:0;flex:1 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#bar .crew small{display:block;font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px;font-weight:400}
+#barBtns{margin-left:auto;display:flex;gap:8px;align-items:center;flex-shrink:0;max-width:62%;overflow:hidden}
+.bookbtn{font-family:var(--sans);font-size:12px;font-weight:700;color:var(--glow);background:rgba(95,227,208,.10);border:1px solid rgba(95,227,208,.4);border-radius:9px;padding:7px 10px;cursor:pointer}
+#inv{display:flex;gap:6px}
+.shard{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;border:1px solid rgba(143,179,191,.35);color:var(--muted);font-size:15px;background:rgba(13,43,62,.6);transition:.4s}
+.shard.has{border-color:var(--gold);color:var(--gold);box-shadow:0 0 14px rgba(224,177,90,.45);background:rgba(224,177,90,.10)}
+.screen{flex:1;display:flex;flex-direction:column;justify-content:flex-start;padding:24px 0;animation:fade .55s ease both}
+@keyframes fade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--glow);margin-bottom:14px}
+h1{font-family:var(--serif);font-weight:900;line-height:1.2;letter-spacing:1px;font-size:clamp(28px,8vw,40px);margin-bottom:18px}
+h2{font-family:var(--serif);font-weight:700;font-size:22px;margin-bottom:10px;letter-spacing:.5px}
+p{margin-bottom:14px;color:#d7e6ea}
+.voice{margin:0;padding:16px 18px;border-radius:14px;position:relative;max-width:92%}
+.voice .who{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;display:block}
+.voice-third{background:rgba(13,43,62,.6);border-left:3px solid var(--gold);border-top-left-radius:4px}
+.voice-third .who{color:var(--gold)}.voice-third .what{font-family:var(--sans);color:#dfeef1}
+.voice-first{background:rgba(95,227,208,.07);border:1px solid rgba(95,227,208,.24);border-top-left-radius:4px}
+.voice-first .who{color:var(--glow)}.voice-first .what{font-family:var(--serif);font-style:italic;font-size:18px;letter-spacing:.6px;color:#eaf6f5;line-height:1.85}
+.voice-system{background:rgba(42,157,181,.10);border:1px dashed rgba(42,157,181,.4)}
+.voice-system .who{color:var(--aqua)}.voice-system .what{font-family:var(--sans);color:#cfe6ec}
+.voice-clue{background:rgba(224,177,90,.10);border:1px solid rgba(224,177,90,.4);border-top-left-radius:4px}
+.voice-clue .who{color:var(--gold)}.voice-clue .what{font-family:var(--sans);color:#f4e6c8}
+#chat{display:flex;flex-direction:column;gap:14px;padding:6px 0 14px;min-height:40px}
+#chat .voice{align-self:flex-start;animation:pop .4s ease both}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+.typing{align-self:flex-start;display:inline-flex;gap:6px;padding:15px 18px;border-radius:14px;border-top-left-radius:4px;background:rgba(13,43,62,.55);border:1px solid rgba(143,179,191,.2)}
+.typing i{width:7px;height:7px;border-radius:50%;background:var(--glow);animation:blink 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
+#composer{position:sticky;bottom:0;padding:10px 0 4px;background:linear-gradient(transparent,var(--abyss) 22%)}
+.hint-img{width:100%;max-width:300px;margin:6px auto 16px;display:block;border-radius:12px;border:1px solid rgba(143,179,191,.3);background:rgba(28,35,48,.5)}
+.hint-img svg{width:100%;height:auto;display:block;border-radius:12px}
+.btn{font-family:var(--sans);font-weight:700;font-size:16px;border:none;cursor:pointer;padding:15px 22px;border-radius:12px;width:100%;margin-top:10px;transition:.2s;letter-spacing:.5px}
+.btn-go{background:linear-gradient(135deg,var(--aqua),var(--teal));color:#fff;box-shadow:0 6px 20px rgba(42,157,181,.35)}
+.btn-go:active{transform:translateY(2px)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#c89234);color:#2a1c05}
+.btn-ghost{background:transparent;border:1px solid rgba(143,179,191,.4);color:var(--foam)}
+.field{width:100%;font-family:var(--sans);font-size:16px;color:var(--foam);background:rgba(7,26,43,.6);border:1px solid rgba(143,179,191,.35);border-radius:12px;padding:14px;margin-top:10px;outline:none}
+.field:focus{border-color:var(--aqua)}
+textarea.field{min-height:92px;resize:vertical}
+label.lbl{display:block;font-size:13px;color:var(--muted);margin-top:16px;letter-spacing:.5px}
+.cards{display:grid;gap:12px;margin-top:8px}
+.card{padding:16px;border-radius:12px;border:1px solid rgba(143,179,191,.3);background:rgba(13,43,62,.5);cursor:pointer;transition:.2s;display:flex;align-items:center;gap:14px}
+.card:active{transform:scale(.98)}
+.card.sel{border-color:var(--gold);background:rgba(224,177,90,.10);box-shadow:0 0 0 1px var(--gold) inset}
+.card .ic{width:46px;height:46px;flex:none;border-radius:10px;display:grid;place-items:center}
+.card .tt{font-family:var(--serif);font-weight:700;font-size:16px}
+.status{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:center;margin-top:16px;letter-spacing:1px}
+.photo-prev{width:100%;border-radius:12px;margin-top:12px;display:none;border:1px solid var(--gold)}
+.smallbtns{display:flex;gap:8px;margin-top:10px}.smallbtns .btn{margin-top:0}
+.cluebox{background:rgba(224,177,90,.08);border:1px solid rgba(224,177,90,.3);border-radius:12px;padding:14px 16px;margin-top:8px}
+.cluebox .lab{font-family:var(--mono);font-size:11px;color:var(--gold);letter-spacing:2px;margin-bottom:6px}
+.cluebox .txt{color:#f4e6c8;font-size:15px;margin-top:6px}
+.cluebox .txt.more{border-top:1px dashed rgba(224,177,90,.3);padding-top:8px}
+#book{position:fixed;inset:0;z-index:35;background:rgba(4,12,20,.86);display:none;align-items:center;justify-content:center;padding:18px}
+#book .panel{background:var(--deep);border:1px solid rgba(224,177,90,.4);border-radius:16px;width:min(560px,100%);max-height:80vh;overflow:auto;padding:20px}
+#book h3{font-family:var(--serif);color:var(--gold);font-size:20px;margin-bottom:4px}
+#book .sub{font-size:12px;color:var(--muted);margin-bottom:14px}
+#book .entry{border-left:3px solid var(--gold);padding:8px 12px;margin-bottom:12px;background:rgba(224,177,90,.06);border-radius:0 10px 10px 0}
+#book .entry .e-lab{font-family:var(--mono);font-size:11px;color:var(--gold);letter-spacing:1px;margin-bottom:4px}
+#book .empty{color:var(--muted);text-align:center;padding:20px}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:36;max-width:88vw;background:rgba(13,43,62,.96);border:1px solid rgba(95,227,208,.4);color:var(--foam);padding:12px 18px;border-radius:12px;font-size:14px;box-shadow:0 6px 24px rgba(0,0,0,.45);display:none;text-align:center}
+#flood{position:fixed;inset:0;z-index:30;background:var(--abyss);overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#flood .sky{position:absolute;inset:0;background:radial-gradient(80% 60% at 50% 42%,#2a3650,#13171e)}
+#flood .folder{position:relative;z-index:1;width:min(180px,46vw);margin-bottom:18px;opacity:0;animation:fileIn .8s ease .2s forwards}
+@keyframes fileIn{from{opacity:0;transform:translateY(18px) scale(.94)}to{opacity:1;transform:none}}
+#flood .stamp{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%) rotate(-13deg) scale(2.6);z-index:3;font-family:var(--mono);font-weight:900;letter-spacing:3px;font-size:clamp(20px,6vw,34px);color:#7fe0ff;border:4px solid #7fe0ff;border-radius:10px;padding:5px 15px;opacity:0;animation:stamp .45s cubic-bezier(.2,1.7,.4,1) 1.4s forwards}
+@keyframes stamp{0%{opacity:0;transform:translate(-50%,-50%) rotate(-13deg) scale(2.6)}55%{opacity:.95}100%{opacity:.95;transform:translate(-50%,-50%) rotate(-13deg) scale(1)}}
+#flood .ttl{position:relative;z-index:2;text-align:center;padding:0 24px;opacity:0;animation:ttlIn 1s ease .5s forwards}
+@keyframes ttlIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+#flood .ttl .k{font-family:var(--mono);font-size:12px;letter-spacing:4px;color:var(--glow)}
+#flood .ttl h1{font-family:var(--serif);font-weight:900;font-size:clamp(30px,9vw,46px);text-shadow:0 2px 24px rgba(0,0,0,.6)}
+#flood .skip{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:12px;color:var(--muted);background:none;border:none;cursor:pointer;letter-spacing:2px;z-index:3}
+#testToggle{position:fixed;right:14px;bottom:14px;z-index:40;width:50px;height:50px;border-radius:50%;border:1px solid rgba(95,227,208,.5);background:rgba(13,43,62,.9);color:var(--glow);font-size:20px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.4);display:none}
+#muteBtn{position:fixed;left:14px;bottom:14px;z-index:40;width:46px;height:46px;border-radius:50%;border:1px solid rgba(217,165,49,.5);background:rgba(28,35,48,.92);color:var(--gold);font-size:19px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+#testPanel{position:fixed;right:14px;bottom:74px;z-index:40;width:min(330px,92vw);max-height:74vh;overflow:auto;display:none;border-radius:14px;padding:16px;background:rgba(7,20,33,.97);border:1px dashed var(--glow);box-shadow:0 8px 30px rgba(0,0,0,.5)}
+#testPanel h3{font-family:var(--mono);font-size:12px;letter-spacing:2px;color:var(--glow);margin-bottom:6px;text-transform:uppercase}
+#testPanel .tnote{font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5}
+#testPanel .tbtn{font-size:13px;padding:9px 12px;margin:4px 0;border-radius:8px;width:100%;background:rgba(42,157,181,.18);border:1px solid rgba(42,157,181,.4);color:var(--foam);cursor:pointer;text-align:left}
+#testPanel .tbtn.sim{background:rgba(224,177,90,.14);border-color:rgba(224,177,90,.5)}
+#testPanel hr{border:none;border-top:1px solid rgba(143,179,191,.2);margin:12px 0}
+#testPanel .tin{width:100%;padding:8px;font-size:13px;border-radius:8px;margin-top:4px;background:rgba(7,26,43,.7);border:1px solid rgba(143,179,191,.35);color:var(--foam)}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.001s!important}}
+.qbadge{font-family:var(--mono);font-size:11px;color:#ffd9a8;background:rgba(224,177,90,.16);border:1px solid rgba(224,177,90,.5);border-radius:8px;padding:5px 8px;align-items:center;margin-right:6px}
+#scanner{position:fixed;inset:0;z-index:45;background:rgba(4,12,20,.92);display:none;align-items:center;justify-content:center;padding:18px}
+#scanner .spanel{background:var(--deep);border:1px solid rgba(95,227,208,.4);border-radius:16px;width:min(420px,100%);padding:16px}
+#scanner #reader{width:100%;border-radius:12px;overflow:hidden}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body>
+<div id="sea"></div>
+<div id="flood">
+  <div class="sky"></div>
+  <svg class="folder" viewBox="0 0 200 200" fill="none">
+    <circle cx="100" cy="100" r="94" fill="#191333" stroke="#d9a531" stroke-width="6"/>
+    <circle cx="100" cy="100" r="83" fill="none" stroke="#3b3068" stroke-width="2"/>
+    <ellipse cx="100" cy="100" rx="74" ry="30" fill="none" stroke="#3b3068" stroke-width="2" transform="rotate(28 100 100)"/>
+    <circle cx="164" cy="76" r="5" fill="#7fe0ff"/>
+    <rect x="62" y="52" width="76" height="9" rx="3" fill="#d9a531"/>
+    <rect x="62" y="139" width="76" height="9" rx="3" fill="#d9a531"/>
+    <path d="M70 61 H130 L104 100 Z" fill="#241d44" stroke="#ece9f7" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M104 100 L130 139 H70 Z" fill="#241d44" stroke="#ece9f7" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M84 70 H120 L104 92 Z" fill="#d9a531"/>
+    <path d="M100 100 L108 100 L116 136 H88 Z" fill="#d9a531"/>
+    <rect x="101" y="96" width="6" height="20" fill="#d9a531"/>
+  </svg>
+  <div class="stamp">TIMELINE</div>
+  <div class="ttl"><div class="k">機密 · 時空任務啟動</div><h1>時空維護者</h1></div>
+  <button class="skip" onclick="endFlood()">略過 ▸</button>
+</div>
+<div id="app"><div id="bar"><div class="crew" id="crewName">—</div>
+  <div id="barBtns"><span id="qBadge" class="qbadge" style="display:none"></span><button class="bookbtn" onclick="openBook()">📜 線索簿</button><div id="inv"></div></div></div>
+<div id="screen" class="screen"></div></div>
+<div id="book"><div class="panel"><h3>線索簿</h3><div class="sub">已得到的線索都記在這。卡關時調查局會慢慢給更明確的情報。</div><div id="bookList"></div>
+  <button class="btn btn-ghost" onclick="closeBook()">關閉</button></div></div>
+<div id="toast"></div>
+<div id="scanner"><div class="spanel"><div id="reader"></div>
+  <div class="smallbtns"><button class="btn btn-ghost" onclick="manualFromScan()">改用手動輸入</button><button class="btn btn-ghost" onclick="stopScan()">取消</button></div></div></div>
+<button id="testToggle" title="教師測試模式" onclick="toggleTest()">🧪</button>
+<button id="muteBtn" title="音效開關" onclick="toggleMute()">🔊</button>
+<div id="testPanel">
+  <h3>教師測試模式</h3>
+  <div class="tnote">列出目前「可抵達且有新進展的地點」，按一下模擬走到該點。實際到校園時靠 GPS 或掃 QR 觸發。</div>
+  <div id="testTargets"></div>
+  <hr>
+  <div style="font-size:12px;color:var(--muted)">手動輸入 QR 代碼</div>
+  <input class="tin" id="qrInput" placeholder="例如 WELL01" />
+  <button class="tbtn" onclick="manualQR()">送出代碼</button>
+  <hr>
+  <div style="font-size:12px;color:var(--muted)">載入自訂故事包（編輯後台匯出的 JSON）</div>
+  <input type="file" accept="application/json,.json" class="tin" id="packFile" onchange="loadPackFile(this)">
+  <hr>
+  <button class="tbtn" onclick="resetGame()">↺ 重新開始整個遊戲</button>
+</div>
+
+<script>
+/* =========================================================================
+   引擎 ＋ 故事包架構
+   -------------------------------------------------------------------------
+   ★ 分層找路提示：序章的 fragment、以及任務 onComplete 的「下一站線索」，
+     都可附 clueHints:[{after,text}]。學生在尋找途中，過了 after 秒會自動
+     跳出更明確的一層（記進線索簿）。base 為第一層，clueHints 為第 2~4 層。
+   ★ 蒐集型主任務：主任務 unlock.requiresItems 列 2 個以上道具，代表要先
+     在 2 處以上取得關鍵線索才解得開（示範：回到 A 的主任務需 B、C 兩樣記憶）。
+   座標與 QR 為示範佔位值，部署前請替換成校園實際資料。
+   ========================================================================= */
+const DEFAULT_STORY = {
+  meta:{ id:"agency-demo", title:"神祕調查局 · 示範案件", theme:"調查局／案件", voice:"探員筆記" },
+  nav:"clueDriven",
+  backend:{ url:"", logGps:true, gpsIntervalSec:15 },
+  items:{
+    clue_a:{ label:"證物 A", glyph:"🔑" },
+    clue_b:{ label:"證物 B", glyph:"📄" }
+  },
+  intro:[
+    { who:"third", label:"調查局情報", text:"這是一份示範案件，用來確認裝置與流程正常。" },
+    { who:"system", label:"任務說明", text:"依線索走到各點蒐證，集齊兩件證物，回指揮中心結案。要載入你自己的故事包：點右下角 🧪 →『選擇檔案』載入 story.json。" }
+  ],
+  prologue:{
+    intro:{ who:"system", label:"出發", text:"讀懂第一條線索，走過去查看（測試時用 🧪 面板『模擬抵達』即可）。" },
+    fragments:{ A:{ img:"logo", startTask:"d_a", clue:"先到『示範現場一號』。",
+      clueHints:[ {after:30,text:"代碼 DEMO_A。"}, {after:60,text:"用 🧪 面板模擬抵達，或輸入 DEMO_A。"} ] } }
+  },
+  flowMode:"conditional",
+  groups:[ { id:"A", name:"示範探員隊" } ],
+  tasks:[
+    { id:"d_a", name:"示範現場一號", trigger:{type:"qr",qr:"DEMO_A"}, unlock:{type:"always"},
+      narrative:[ {who:"first",label:"探員筆記",text:"現場有一道簡單的測試題。"} ],
+      response:{ type:"number", prompt:"測試題：2 + 3 = ?" },
+      validation:{ type:"exact", value:"5", successText:"證物 A 入袋。咦，這裡還留著下一條線索。", failText:"2+3=5。" },
+      onComplete:{ give:"clue_a", clueText:"接著到『示範現場二號』。", clueHints:[ {after:30,text:"代碼 DEMO_B。"} ] } },
+    { id:"d_b", name:"示範現場二號", trigger:{type:"qr",qr:"DEMO_B"}, unlock:{type:"always"},
+      narrative:[ {who:"first",label:"探員筆記",text:"再一道測試題。"} ],
+      response:{ type:"number", prompt:"測試題：10 − 4 = ?" },
+      validation:{ type:"exact", value:"6", successText:"證物 B 入袋。兩件證物到齊了。", failText:"10−4=6。" },
+      onComplete:{ give:"clue_b", clueText:"回指揮中心結案。", clueHints:[ {after:30,text:"代碼 HQ。"} ] } },
+    { id:"d_core", name:"指揮中心", trigger:{type:"qr",qr:"HQ"}, unlock:{type:"requiresItems",value:["clue_a","clue_b"]},
+      lockedText:"證物還沒到齊，先把兩個示範現場查完再回來。",
+      narrative:[ {who:"system",label:"指揮中心",text:"兩件證物齊了，示範案件可以結案。"} ],
+      response:{ type:"info", prompt:"示範案件結案。" },
+      validation:{ type:"none", successText:"結案！引擎運作正常。" },
+      onComplete:{ end:true } }
+  ],
+  ending:[
+    { who:"system", label:"示範完成", text:"這是內建示範案件。載入你自己的 story.json（🧪 →『選擇檔案』，或把 story.json 與 index.html 放同資料夾上線）即可開始真正的任務。" }
+  ]
+};
+let STORY = DEFAULT_STORY;   // 可被外部故事包（編輯後台或 skill 匯出的 JSON）取代
+
+const SVGS = {
+  drops:`<svg viewBox="0 0 120 90"><g fill="#8fb6c9" opacity=".85"><path d="M40 20c0 8-6 12-6 18a6 6 0 0012 0c0-6-6-10-6-18z"/><path d="M70 14c0 10-8 15-8 23a8 8 0 0016 0c0-8-8-13-8-23z"/><path d="M52 50c0 6-5 9-5 14a5 5 0 0010 0c0-5-5-8-5-14z"/></g></svg>`,
+  seed:`<svg viewBox="0 0 80 80"><path d="M40 70 V42" stroke="#8fb6c9" stroke-width="4"/><path d="M40 46c-12 0-18-10-18-18 12 0 18 10 18 18z" fill="#8fb6c9"/><path d="M40 50c10 0 16-8 16-15-10 0-16 7-16 15z" fill="#6f9bb0"/><ellipse cx="40" cy="72" rx="14" ry="4" fill="#d9a531"/></svg>`,
+  fire:`<svg viewBox="0 0 80 80"><path d="M40 12c8 14-6 16 0 30 10-4 6-14 14-10 6 14-4 36-14 36S20 52 28 36c4 6 6 2 4-6 4 2 6 6 8-18z" fill="#e07a6a"/></svg>`,
+  bolt:`<svg viewBox="0 0 80 80"><path d="M46 10 26 44h14l-8 26 30-40H46l8-20z" fill="#d9a531"/></svg>`,
+  snow:`<svg viewBox="0 0 80 80"><g stroke="#aac7d4" stroke-width="3"><path d="M40 12v56M16 26l48 28M64 26L16 54"/></g></svg>`,
+  shapes6:`<svg viewBox="0 0 300 150"><g stroke="#1c2330" stroke-width="2"><polygon points="35,18 55,52 15,52" fill="#d9a531"/><polygon points="95,14 117,52 73,52" fill="#d9a531"/><polygon points="165,20 187,55 143,55" fill="#d9a531"/><polygon points="45,86 67,124 23,124" fill="#d9a531"/><polygon points="120,92 142,128 98,128" fill="#d9a531"/><polygon points="255,88 277,126 233,126" fill="#d9a531"/><circle cx="220" cy="34" r="17" fill="#8fb6c9"/><circle cx="265" cy="40" r="14" fill="#8fb6c9"/><circle cx="195" cy="112" r="17" fill="#8fb6c9"/><rect x="178" y="78" width="34" height="34" rx="4" fill="#aac7d4"/><rect x="232" y="16" width="30" height="30" rx="4" fill="#aac7d4"/></g></svg>`,
+  rings:`<svg viewBox="0 0 120 90"><g fill="none" stroke="#8fb6c9" stroke-width="4"><circle cx="60" cy="45" r="10"/><circle cx="60" cy="45" r="20"/><circle cx="60" cy="45" r="30"/><circle cx="60" cy="45" r="40"/></g></svg>`,
+  steps:`<svg viewBox="0 0 120 90"><g fill="#d9a531"><rect x="14" y="62" width="26" height="16"/><rect x="40" y="46" width="26" height="32"/><rect x="66" y="30" width="26" height="48"/><rect x="92" y="14" width="14" height="64"/></g></svg>`,
+  logo:`<svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="94" fill="#1c2330" stroke="#d9a531" stroke-width="6"/><circle cx="100" cy="100" r="83" fill="none" stroke="#3b4a6b" stroke-width="2"/><circle cx="88" cy="86" r="34" fill="#243049"/><g stroke="#3b4a6b" stroke-width="2"><path d="M78 58V114M98 58V114M58 76H118M58 96H118"/></g><path d="M88 64c-10 0-17 8-17 17 0 12 17 27 17 27s17-15 17-27c0-9-7-17-17-17z" fill="#d9a531"/><circle cx="88" cy="81" r="6" fill="#1c2330"/><circle cx="88" cy="86" r="34" fill="none" stroke="#e9edf2" stroke-width="8"/><line x1="112" y1="110" x2="142" y2="140" stroke="#e9edf2" stroke-width="14" stroke-linecap="round"/><line x1="112" y1="110" x2="142" y2="140" stroke="#d9a531" stroke-width="5" stroke-linecap="round"/></svg>`,
+  logo_time:`<svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="94" fill="#1c2330" stroke="#d9a531" stroke-width="6"/><circle cx="100" cy="100" r="83" fill="none" stroke="#3b4a6b" stroke-width="2"/><ellipse cx="100" cy="100" rx="74" ry="30" fill="none" stroke="#3b4a6b" stroke-width="2" transform="rotate(28 100 100)"/><circle cx="164" cy="76" r="5" fill="#8fb6c9"/><rect x="62" y="52" width="76" height="9" rx="3" fill="#d9a531"/><rect x="62" y="139" width="76" height="9" rx="3" fill="#d9a531"/><path d="M70 61 H130 L104 100 Z" fill="#243049" stroke="#e9edf2" stroke-width="4" stroke-linejoin="round"/><path d="M104 100 L130 139 H70 Z" fill="#243049" stroke="#e9edf2" stroke-width="4" stroke-linejoin="round"/><path d="M84 70 H120 L104 92 Z" fill="#d9a531"/><path d="M100 100 L108 100 L116 136 H88 Z" fill="#d9a531"/><rect x="101" y="96" width="6" height="20" fill="#d9a531"/></svg>`
+};
+function svg(name){ const s=(SVGS[name]||"").replace(/\n/g,""); return s ? "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(s) : ""; }
+function imgSrc(v){ if(typeof v!=="string"||!v) return ""; return /^(https?:|data:)/.test(v) ? v : svg(v); }
+function clueImg(code){ if(typeof code!=="string"||!code) return "";
+  if(SVGS[code]) return `<div class="hint-img">${SVGS[code]}</div>`;            // 內建圖示：直接內嵌，不會破圖
+  if(/^(https?:|data:)/.test(code)) return `<img class="hint-img" src="${code}" alt="線索圖">`;
+  return ""; }
+(function(){ if(/[?&](test|teacher)=1/.test(location.search)||/(test|teacher)/.test(location.hash)){ var tb=document.getElementById("testToggle"); if(tb) tb.style.display="block"; } })();
+
+/* =========================================================================
+   引擎
+   ========================================================================= */
+const state = { phase:"intro", group:null, fragment:null, collected:new Set(),
+  completed:new Set(), answers:{}, clueLog:[], navClue:null, position:null, activeTask:null, taskStartTs:0 };
+const $ = s => document.querySelector(s);
+const screenEl = $("#screen");
+function task(id){ return STORY.tasks.find(t=>t.id===id); }
+function vlabel(){ return (STORY.meta && STORY.meta.voice) || "線索"; }
+
+/* ========== 音效系統（Web Audio 合成；離線可用） ========== */
+const Audi = { ctx:null, master:null, music:null, sfx:null, muted:false, started:false, timer:null, step:0, nextT:0 };
+function audioMuteKey(){ return "quest-muted"; }
+function initAudio(){
+  if(Audi.ctx) return;
+  try{
+    const AC = window.AudioContext||window.webkitAudioContext; if(!AC) return;
+    Audi.ctx = new AC();
+    Audi.master = Audi.ctx.createGain(); Audi.master.gain.value = Audi.muted?0:1; Audi.master.connect(Audi.ctx.destination);
+    Audi.music = Audi.ctx.createGain(); Audi.music.gain.value = 0.5; Audi.music.connect(Audi.master);
+    Audi.sfx = Audi.ctx.createGain(); Audi.sfx.gain.value = 0.9; Audi.sfx.connect(Audi.master);
+  }catch(e){}
+}
+function tone(freq,start,dur,type,peak,dest){
+  if(!Audi.ctx) return;
+  const o=Audi.ctx.createOscillator(), g=Audi.ctx.createGain();
+  o.type=type||"triangle"; o.frequency.value=freq;
+  g.gain.setValueAtTime(0.0001,start);
+  g.gain.linearRampToValueAtTime(peak||0.2, start+0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, start+dur);
+  o.connect(g).connect(dest||Audi.sfx); o.start(start); o.stop(start+dur+0.03);
+}
+function sfx(seq,type,peak,dest){ if(!Audi.ctx) return; const t0=Audi.ctx.currentTime;
+  seq.forEach(([f,at,dur])=>tone(f, t0+at, dur, type, peak, dest)); }
+function sfxCorrect(){ sfx([[523.25,0,.12],[659.25,.08,.12],[783.99,.16,.22]],"triangle",.22); }     // C5-E5-G5 上行
+function sfxWrong(){ sfx([[220,0,.16],[174.61,.12,.22]],"sawtooth",.16); }                            // A3-F3 下行（輕）
+function sfxItem(){ sfx([[784,0,.10],[1046.5,.09,.20]],"sine",.20); }                                  // G5-C6 亮閃
+function sfxWin(){ if(!Audi.ctx) return; const t0=Audi.ctx.currentTime, M=Audi.sfx;
+  // 背景樂短暫退下，讓勝利曲清楚，約 4 秒後回復
+  if(Audi.music){ const g=Audi.music.gain; g.cancelScheduledValues(t0); g.setValueAtTime(g.value,t0);
+    g.linearRampToValueAtTime(0.10, t0+0.12); g.setValueAtTime(0.10, t0+3.7); g.linearRampToValueAtTime(0.5, t0+4.5); }
+  // 主旋律：三短一長的號角 → 上行 → 高音收束 → 上行裝飾 → 終音
+  const mel=[[392,0,.12],[392,.15,.12],[392,.30,.12],[523.25,.45,.42],
+             [659.25,.95,.16],[783.99,1.15,.16],[1046.5,1.35,.55],
+             [783.99,2.00,.14],[880,2.16,.14],[987.77,2.32,.14],[1046.5,2.48,.78]];
+  mel.forEach(([f,a,d])=>tone(f, t0+a, d, "triangle", .22, M));
+  // 貝斯支撐
+  [[130.81,.45,.5],[98,1.35,.4],[130.81,2.48,1.1]].forEach(([f,a,d])=>tone(f, t0+a, d, "triangle", .16, M));
+  // 終和弦（C 大三和弦）＋ 高音閃亮上行
+  [[523.25,2.5,1.25],[659.25,2.5,1.25],[783.99,2.5,1.25]].forEach(([f,a,d])=>tone(f, t0+a, d, "sine", .07, M));
+  [[1046.5,2.9,.18],[1318.51,3.02,.18],[1567.98,3.14,.55]].forEach(([f,a,d])=>tone(f, t0+a, d, "sine", .08, M));
+}                                                                    // 勝利小號＋低音
+function sfxStamp(){ if(!Audi.ctx) return; const t0=Audi.ctx.currentTime;
+  const o=Audi.ctx.createOscillator(), g=Audi.ctx.createGain();
+  o.type="triangle"; o.frequency.setValueAtTime(150,t0); o.frequency.exponentialRampToValueAtTime(55,t0+.14);
+  g.gain.setValueAtTime(.0001,t0); g.gain.linearRampToValueAtTime(.5,t0+.008); g.gain.exponentialRampToValueAtTime(.0001,t0+.22);
+  o.connect(g).connect(Audi.sfx); o.start(t0); o.stop(t0+.26); }
+
+/* 輕快探索背景樂：C–G–Am–F 循環，貝斯＋琶音＋稀疏旋律 */
+const MUS = (function(){
+  const N={C2:65.41,G2:98,A2:110,F2:87.31,C4:261.63,D4:293.66,E4:329.63,F4:349.23,G4:392,A4:440,B4:493.88,C5:523.25,D5:587.33,E5:659.25,F5:698.46,G5:783.99,A5:880};
+  // 4 和弦，每和弦 8 個八分音；bass=每和弦根音，arp=循環和弦音，mel=稀疏旋律
+  const chords=[
+    {bass:N.C2, arp:[N.C4,N.E4,N.G4,N.E4], mel:[N.G4,0,N.E4,0,0,N.G4,0,0]},
+    {bass:N.G2, arp:[N.D4,N.G4,N.B4,N.G4], mel:[0,0,N.D5,0,N.B4,0,0,0]},
+    {bass:N.A2, arp:[N.A4,N.C5,N.E5,N.C5], mel:[N.E5,0,0,N.C5,0,0,N.A4,0]},
+    {bass:N.F2, arp:[N.F4,N.A4,N.C5,N.A4], mel:[0,N.C5,0,0,N.F5,0,N.E5,0]}
+  ];
+  return { N, chords };
+})();
+function scheduleStep(s, t){
+  const ci=Math.floor(s/8)%4, pos=s%8, ch=MUS.chords[ci];
+  if(pos===0||pos===4) tone(ch.bass, t, .42, "triangle", .12, Audi.music);          // 貝斯（拍1、拍3）
+  if(pos%2===0) tone(ch.arp[(pos/2)%4], t, .30, "sine", .05, Audi.music);            // 琶音（每拍）
+  const m=ch.mel[pos]; if(m) tone(m, t, .26, "triangle", .055, Audi.music);          // 稀疏旋律
+}
+function musicScheduler(){
+  if(!Audi.ctx) return; const eighth = (60/112)/2; // 112 BPM 的八分音
+  while(Audi.nextT < Audi.ctx.currentTime + 0.15){
+    scheduleStep(Audi.step, Audi.nextT);
+    Audi.nextT += eighth; Audi.step = (Audi.step+1)%32;
+  }
+}
+function startMusic(){ if(!Audi.ctx||Audi.timer) return; Audi.step=0; Audi.nextT=Audi.ctx.currentTime+0.1;
+  Audi.timer=setInterval(musicScheduler, 25); }
+function stopMusic(){ if(Audi.timer){ clearInterval(Audi.timer); Audi.timer=null; } }
+function unlockAudio(){ initAudio(); if(!Audi.ctx) return;
+  if(Audi.ctx.state==="suspended"){ try{ Audi.ctx.resume(); }catch(e){} }
+  if(!Audi.started){ Audi.started=true; if(!Audi.muted){ sfxStamp(); startMusic(); } } }
+function applyMuteUI(){ const b=$("#muteBtn"); if(b) b.textContent = Audi.muted ? "🔇" : "🔊"; }
+function toggleMute(){ Audi.muted=!Audi.muted; try{ localStorage.setItem(audioMuteKey(), Audi.muted?"1":"0"); }catch(e){}
+  initAudio();
+  if(Audi.master) Audi.master.gain.value = Audi.muted?0:1;
+  if(Audi.muted){ stopMusic(); }
+  else{ if(Audi.ctx&&Audi.ctx.state==="suspended"){ try{Audi.ctx.resume();}catch(e){} } if(Audi.started) startMusic(); else unlockAudio(); }
+  applyMuteUI();
+}
+(function(){ try{ Audi.muted = localStorage.getItem(audioMuteKey())==="1"; }catch(e){}
+  applyMuteUI();
+  ["pointerdown","touchend","keydown"].forEach(ev=>document.addEventListener(ev, unlockAudio, {once:false, passive:true}));
+})();
+
+function unlocked(t){
+  const u=t.unlock||{type:"always"};
+  if(u.type==="always") return true;
+  if(u.type==="afterTasks") return u.value.every(id=>state.completed.has(id));
+  if(u.type==="requiresItems") return u.value.every(it=>state.collected.has(it));
+  if(u.type==="ifAnswer") return state.answers[u.taskId]===u.equals;
+  return true;
+}
+function taskForGroup(t){ return !t.group || (state.group && t.group === state.group.id); }
+function relevantItems(){
+  const ids=new Set();
+  STORY.tasks.forEach(t=>{ if(taskForGroup(t) && t.onComplete && t.onComplete.give) ids.add(t.onComplete.give); });
+  const ks=Object.keys(STORY.items||{}).filter(k=>ids.has(k));
+  return ks.length?ks:Object.keys(STORY.items||{});
+}
+function activeTargets(){
+  if(state.phase==="prologue"){ const t=task(state.fragment&&state.fragment.startTask); return t&&!state.completed.has(t.id)?[t]:[]; }
+  return STORY.tasks.filter(t=>!state.completed.has(t.id)&&unlocked(t)&&taskForGroup(t));
+}
+function triggerMatches(t,kind,val){ const tr=t.trigger; if(!tr) return false;
+  if(kind==="qr") return (tr.type==="qr"||tr.type==="either") && (tr.qr||"").toUpperCase()===(val||"").toUpperCase();
+  if(kind==="gps"){ if(!(tr.type==="gps"||tr.type==="either")||!tr.gps) return false; return haversine(val.lat,val.lng,tr.gps.lat,tr.gps.lng)<=(tr.gps.radius||25); }
+  return false; }
+function resolveArrival(kind,val){
+  const here=STORY.tasks.filter(t=>triggerMatches(t,kind,val));
+  if(!here.length) return {status:"unknown"};
+  const mine=here.filter(taskForGroup);
+  if(!mine.length) return {status:"wronggroup"};
+  const active=mine.find(t=>!state.completed.has(t.id)&&unlocked(t));
+  if(active) return {status:"open",task:active};
+  const locked=mine.find(t=>!state.completed.has(t.id));
+  return locked ? {status:"locked",task:locked} : {status:"done"};
+}
+function arriveByQR(code){
+  const r=resolveArrival("qr",code);
+  if(r.status==="open"){ openTask(r.task.id); return; }
+  if(r.status==="unknown"){ toast("這個代碼在這個案件裡找不到。"); return; }
+  if(r.status==="wronggroup"){ toast("這不是你們這組的關卡喔，看看自己的線索吧。"); return; }
+  if(r.status==="locked"){ toast((r.task&&r.task.lockedText) || "你來得太早了，似乎還少了什麼——先依線索去別處查查。"); return; }
+  toast("這條線索，你已經查過了。");
+}
+function arriveBySim(id){ openTask(id); }
+function checkGPS(lat,lng){ const r=resolveArrival("gps",{lat,lng}); if(r.status==="open") openTask(r.task.id); }
+function haversine(a,b,c,d){ const R=6371000,r=Math.PI/180; const x=Math.sin((c-a)*r/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin((d-b)*r/2)**2; return 2*R*Math.asin(Math.sqrt(x)); }
+let geoId=null;
+function startGeo(){ if(!navigator.geolocation) return;
+  try{ geoId=navigator.geolocation.watchPosition(
+    p=>{ state.position={lat:p.coords.latitude,lng:p.coords.longitude};
+      const s=$("#geoStatus"); if(s) s.textContent="定位中… 走到目標點會自動觸發";
+      checkGPS(state.position.lat,state.position.lng); },
+    ()=>{ const s=$("#geoStatus"); if(s) s.textContent="（目前拿不到定位，可掃 QR 或用測試模式）"; },
+    { enableHighAccuracy:true, maximumAge:3000 }); }catch(e){} }
+
+/* 後端回傳 */
+function backendOn(){ return STORY.backend && STORY.backend.url; }
+function postBackend(payload){ if(!backendOn()) return;
+  try{ fetch(STORY.backend.url,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)}); }catch(e){} }
+function resizeImage(file,maxDim,quality){ return new Promise((res,rej)=>{ const img=new Image();
+  img.onload=()=>{ let w=img.width,h=img.height;
+    if(w>h&&w>maxDim){ h=Math.round(h*maxDim/w); w=maxDim; } else if(h>=w&&h>maxDim){ w=Math.round(w*maxDim/h); h=maxDim; }
+    const c=document.createElement("canvas"); c.width=w; c.height=h; c.getContext("2d").drawImage(img,0,0,w,h);
+    try{ res(c.toDataURL("image/jpeg",quality)); }catch(e){ rej(e); } };
+  img.onerror=rej; img.src=URL.createObjectURL(file); }); }
+let pendingPhoto=null, pendingPhotoFile=null;
+let hbTimer=null;
+function startHeartbeat(){ const b=STORY.backend; if(!b||!b.url||!b.logGps) return; stopHeartbeat();
+  hbTimer=setInterval(()=>{ if(state.position&&state.group){ postBackend({type:"gps",groupId:state.group.id,groupName:state.group.name,lat:state.position.lat,lng:state.position.lng,ts:new Date().toISOString()}); } }, Math.max(5,(b.gpsIntervalSec||15))*1000); }
+function stopHeartbeat(){ if(hbTimer){ clearInterval(hbTimer); hbTimer=null; } }
+
+/* ---- 對話 / 提示 ---- */
+let playToken=0, hintTimers=[];
+function clearHintTimers(){ hintTimers.forEach(clearTimeout); hintTimers=[]; }
+function typingDelay(t){ return 450+Math.min((t||"").length*42,1400); }
+function scrollChat(box){ const last=box&&box.lastElementChild; if(last&&last.scrollIntoView) last.scrollIntoView({behavior:"smooth",block:"nearest"}); }
+function appendVoice(sel,v){ const box=document.querySelector(sel); if(!box) return;
+  const d=document.createElement("div"); d.className="voice voice-"+v.who;
+  d.innerHTML=`<span class="who">${v.label||""}</span><div class="what">${v.text}</div>`; box.appendChild(d); scrollChat(box); }
+function showTyping(sel,text,cb){ const box=document.querySelector(sel); if(!box){ cb&&cb(); return; }
+  const tok=playToken; const tp=document.createElement("div"); tp.className="typing"; tp.innerHTML="<i></i><i></i><i></i>"; box.appendChild(tp); scrollChat(box);
+  setTimeout(()=>{ if(tok!==playToken){return;} tp.remove(); cb&&cb(); }, typingDelay(text)); }
+function playQueue(sel,voices,onDone){ const tok=playToken; let i=0;
+  (function step(){ if(tok!==playToken) return; if(i>=voices.length){ onDone&&onDone(); return; }
+    const v=voices[i++]; showTyping(sel,v.text,()=>{ if(tok!==playToken)return; appendVoice(sel,v); setTimeout(step,340); }); })(); }
+function say(v,cb){ showTyping("#chat",v.text,()=>{ appendVoice("#chat",v); cb&&cb(); }); }
+
+/* ---- 分層找路提示（依時間自動升級）---- */
+let clueTimer=null;
+function clearClueTimer(){ if(clueTimer){ clearInterval(clueTimer); clueTimer=null; } }
+function setNavClue(base, hints, label){
+  state.navClue = { label:label||"線索", base:base||"", hints:(hints||[]).slice().sort((a,b)=>(a.after||0)-(b.after||0)), startTs:Date.now(), recorded:0 };
+  if(base){ state.clueLog.push({label:label||"線索", text:base}); state.navClue.recorded=1; }
+  saveState();
+}
+function navLayers(){ const c=state.navClue; if(!c) return [];
+  const out = c.base ? [c.base] : []; const el=(Date.now()-c.startTs)/1000;
+  c.hints.forEach(h=>{ if(el >= (h.after||0)) out.push(h.text); }); return out; }
+function refreshClueBox(){ const box=document.getElementById("clueBox"); if(!box) return;
+  const layers=navLayers();
+  if(!state.navClue || !layers.length){ box.innerHTML=`<div class="txt" style="color:var(--muted)">還沒有線索。</div>`; return; }
+  box.innerHTML=`<div class="lab">線索 · ${state.navClue.label}</div>`+layers.map((t,i)=>`<div class="txt${i>0?' more':''}">${t}</div>`).join(""); }
+function startClueTimer(){ clearClueTimer();
+  if(!state.navClue || !state.navClue.hints.length) return;
+  clueTimer=setInterval(()=>{
+    const layers=navLayers();
+    if(layers.length > state.navClue.recorded){
+      for(let i=state.navClue.recorded;i<layers.length;i++) state.clueLog.push({label:(state.navClue.label||"線索")+"（更明確）",text:layers[i]});
+      state.navClue.recorded=layers.length; refreshClueBox(); toast("調查局傳來更清楚的情報（已記入線索簿）"); saveState();
+    }
+    if(layers.length >= 1+state.navClue.hints.length) clearClueTimer();
+  },3000); }
+
+/* =========================================================================
+   畫面
+   ========================================================================= */
+function swap(html){ playToken++; clearHintTimers(); clearClueTimer(); screenEl.innerHTML=html; refreshTest(); }
+function render(){ updateBar(); if(state.group) saveState();
+  if(state.phase==="intro") return renderIntro();
+  if(state.phase==="setup") return renderSetup();
+  if(state.phase==="prologue") return renderPrologue();
+  if(state.phase==="hub") return renderHub();
+  if(state.phase==="task") return renderTask();
+  if(state.phase==="ending") return renderEnding();
+}
+function renderIntro(){
+  swap(`<div class="eyebrow">教室集合 · 行前說明</div><h1>${STORY.meta.title}</h1><div id="chat"></div><div id="composer"></div>`);
+  playQueue("#chat",STORY.intro,()=>{ const c=$("#composer"); if(c) c.innerHTML=`<button class="btn btn-go" onclick="goSetup()">我們準備好了 ▸</button>`; });
+}
+function goSetup(){ state.phase="setup"; render(); }
+
+let pick={group:null};
+function renderSetup(){
+  swap(`<div class="eyebrow">組隊</div><h2>你們是哪一支隊伍？</h2>
+    <p style="color:var(--muted);font-size:14px">老師會指定組別。</p>
+    <div class="cards">${STORY.groups.map(g=>`<div class="card ${pick.group===g.id?'sel':''}" onclick="selGroup('${g.id}')">
+      <div class="ic" style="background:rgba(224,177,90,.15);color:var(--gold);font-family:var(--serif);font-weight:900;font-size:20px">${g.id}</div>
+      <div><div class="tt">${g.name}</div></div></div>`).join("")}</div>
+    <label class="lbl">隊伍名稱（可自訂，留空就用預設）</label><input class="field" id="teamName" placeholder="例如：深海七號" />
+    <label class="lbl">隊員姓名（用空白隔開）</label><input class="field" id="members" placeholder="例如：小明 小華 阿德" />
+    <button class="btn btn-go" onclick="confirmSetup()">出發 ▸</button>`);
+}
+function selGroup(id){ pick.group=id; renderSetup(); }
+function confirmSetup(){ if(!pick.group){ alert("請先選一支隊伍。"); return; }
+  const g=STORY.groups.find(x=>x.id===pick.group);
+  state.group={ id:g.id, name:($("#teamName").value||"").trim()||g.name, members:($("#members").value||"").trim() };
+  state.fragment=STORY.prologue.fragments[g.id];
+  state.phase="prologue"; $("#bar").style.display="flex"; startGeo(); startHeartbeat(); render();
+}
+function renderPrologue(){
+  const f=state.fragment;
+  swap(`<div class="eyebrow">序章 · 尋找起點</div><div id="chat"></div><div id="composer"></div>`);
+  playQueue("#chat",[ STORY.prologue.intro ],()=>{
+    const c=$("#composer"); if(!c) return;
+    c.innerHTML=`${clueImg(f.img)}
+      <div class="cluebox" id="clueBox"></div>
+      <p style="text-align:center;color:var(--muted);font-size:13px;margin-top:10px">讀懂線索，走到那個地方。卡住時會慢慢給更明確的線索（記進線索簿）。</p>
+      <div class="status" id="geoStatus">準備偵測位置…（到校園會自動觸發；現在可用右下角測試模式）</div>${qrControls()}`;
+    setNavClue(f.clue, f.clueHints, "起點線索"); refreshClueBox(); startClueTimer();
+  });
+}
+function renderHub(){
+  const clueDriven = STORY.nav==="clueDriven";
+  let body;
+  if(clueDriven){
+    body = `<p style="color:var(--muted);font-size:14px">順著線索前往下一個地點。卡住時會慢慢給更明確的線索（也記進線索簿）。</p>
+      <div class="cluebox" id="clueBox"></div>`;
+  }else{
+    const targets=activeTargets();
+    body = `<p style="color:var(--muted);font-size:14px">走到任何一個發亮的地點，任務就會出現。</p>
+      ${targets.length?targets.map(t=>`<div style="padding:14px;border-radius:12px;background:rgba(13,43,62,.5);border:1px solid rgba(143,179,191,.25);margin-bottom:10px"><div style="font-weight:700">${t.name}</div></div>`).join(""):`<div class="status">附近沒有可進行的地點了。</div>`}`;
+  }
+  swap(`<div class="eyebrow">調查中 · ${state.group.name}</div><h2>${(STORY.meta&&STORY.meta.title)||"繼續調查"}</h2>
+    ${body}<div class="status" id="geoStatus">定位中… 走到目標點會自動觸發</div>${qrControls()}`);
+  if(clueDriven){ refreshClueBox(); startClueTimer(); }
+}
+function openTask(id){ state.activeTask=id; state.phase="task"; state.taskStartTs=Date.now(); render(); }
+function renderTask(){
+  const t=task(state.activeTask);
+  swap(`<div class="eyebrow">已抵達 · ${t.name}</div><div id="chat"></div><div id="composer"></div>`);
+  const voices=(t.narrative||[]).concat([{ who:"system", label:"任務", text:t.response.prompt }]);
+  playQueue("#chat",voices,()=>{ showComposer(t); startHintTimers(t); });
+}
+function startHintTimers(t){ (t.hints||[]).forEach(h=>{ hintTimers.push(setTimeout(()=>{
+  if(state.phase==="task"&&state.activeTask===t.id&&!state.completed.has(t.id)) say({who:h.who||"first",label:h.label||vlabel(),text:h.text}); }, (h.after||20)*1000)); }); }
+let chosen=null;
+function showComposer(t){
+  const r=t.response; let body="";
+  if(t.image) body+=clueImg(t.image);
+  if(r.type==="text") body+=`<textarea class="field" id="ans" placeholder="在這裡寫下答案…"></textarea><button class="btn btn-gold" onclick="submitText('${t.id}')">提交答案</button>`;
+  else if(r.type==="number") body+=`<input class="field" inputmode="numeric" id="ans" placeholder="輸入數字…"><button class="btn btn-gold" onclick="submitText('${t.id}')">提交答案</button>`;
+  else if(r.type==="choice") body+=`<div class="cards">${r.options.map(o=>`<div class="card" id="opt_${o.id}" onclick="selOpt('${o.id}')">${o.img?`<div class="ic"><img src="${imgSrc(o.img)}" style="width:40px;height:40px"></div>`:""}<div class="tt">${o.label}</div></div>`).join("")}</div><button class="btn btn-gold" onclick="submitChoice('${t.id}')">確認選擇</button>`;
+  else if(r.type==="photo") body+=`<input type="file" accept="image/*" capture="environment" id="cam" class="field" onchange="prevPhoto(this)"><img id="photoPrev" class="photo-prev"><button class="btn btn-gold" onclick="submitPhoto('${t.id}')">收下這段影像</button>`;
+  else if(r.type==="info") body+=`<button class="btn btn-gold" onclick="finishTask('${t.id}','[ok]')">收下線索 ▸</button>`;
+  const c=$("#composer"); if(c) c.innerHTML=body; chosen=null;
+}
+function selOpt(id){ chosen=id; document.querySelectorAll("#composer .card").forEach(c=>c.classList.remove("sel")); const el=$("#opt_"+id); if(el) el.classList.add("sel"); }
+function prevPhoto(inp){ const f=inp.files&&inp.files[0]; if(!f) return; pendingPhotoFile=f; pendingPhoto=null; const img=$("#photoPrev"); img.src=URL.createObjectURL(f); img.style.display="block"; }
+function submitText(id){ finishTask(id,($("#ans").value||"").trim()); }
+function submitChoice(id){ if(!chosen){ alert("先選一個答案。"); return; } finishTask(id,chosen); }
+function submitPhoto(id){ if(!pendingPhotoFile){ alert("先拍一張照片。"); return; }
+  toast("照片處理中…");
+  resizeImage(pendingPhotoFile,1000,0.6).then(d=>{ pendingPhoto=d; finishTask(id,"[photo]"); })
+    .catch(()=>{ pendingPhoto=null; finishTask(id,"[photo]"); }); }
+function validate(t,val){ const v=t.validation||{type:"none"};
+  if(v.type==="none") return true;
+  if(v.type==="exact") return (val||"").trim()===v.value;
+  if(v.type==="keywords") return v.value.some(k=>(val||"").includes(k));
+  if(v.type==="choice") return val===v.value; return true; }
+function finishTask(id,val){
+  const t=task(id); state.answers[id]=val;
+  if(!validate(t,val)){ sfxWrong(); say({who:"first",label:vlabel(),text:(t.validation&&t.validation.failText)||"再試一次。"}); return; }
+  state.completed.add(id); clearHintTimers();
+  const oc=t.onComplete||{};
+  if(oc.give) state.collected.add(oc.give);
+  updateBar(); saveState();
+  if(backendOn()){ const graded=t.validation&&t.validation.type!=="none";
+    enqueue({ type:"submission", storyId:(STORY.meta&&STORY.meta.id)||"", groupId:state.group.id, groupName:state.group.name, members:state.group.members||"",
+      taskId:id, taskName:t.name, responseType:t.response.type, answer:t.response.type==="photo"?"[photo]":String(val),
+      correct:graded?true:"", durationSec:state.taskStartTs?Math.round((Date.now()-state.taskStartTs)/1000):"",
+      photo:t.response.type==="photo"?pendingPhoto:undefined, ts:new Date().toISOString() });
+    pendingPhoto=null; pendingPhotoFile=null; toast("已記錄，會自動回傳給老師端 ✓"); }
+  const c=$("#composer"); if(c) c.querySelectorAll("button,textarea,input,.card").forEach(e=>{ e.style.pointerEvents="none"; e.style.opacity=".5"; });
+  const okText=((t.validation&&t.validation.successText)||"完成！");
+  if(oc.end) sfxWin(); else if(oc.give) sfxItem(); else if(oc.clueText) sfxCorrect();
+  say({who:"first",label:vlabel(),text:okText},()=>{
+    if(oc.clueText){ setNavClue(oc.clueText, oc.clueHints, "前往下一站"); say({who:"clue",label:"線索 · 已記入線索簿",text:oc.clueText},()=>finishButtons(oc)); }
+    else finishButtons(oc);
+  });
+}
+function finishButtons(oc){ const cc=$("#composer"); if(!cc) return;
+  cc.innerHTML = oc.end ? `<button class="btn btn-gold" onclick="toEnding()">聆聽最後的訊息 ▸</button>` : `<button class="btn btn-go" onclick="toHub()">繼續探索 ▸</button>`; }
+function toHub(){ state.phase="hub"; render(); }
+function toEnding(){ stopHeartbeat(); if(geoId!==null&&navigator.geolocation){ navigator.geolocation.clearWatch(geoId); geoId=null; } state.phase="ending"; saveState(); render(); }
+function renderEnding(){
+  swap(`<div class="eyebrow">尾聲</div><h1 style="font-size:30px">最後的訊息</h1><div id="chat"></div><div id="composer"></div>`);
+  playQueue("#chat",STORY.ending,()=>{ const c=$("#composer"); if(c) c.innerHTML=`<button class="btn btn-go" onclick="resetGame()">↺ 再玩一次 / 換下一隊</button>`; });
+}
+function qrControls(){ return `<div class="smallbtns"><button class="btn btn-ghost" onclick="startScan()">📷 掃 QR 代碼</button><button class="btn btn-ghost" onclick="promptQR()">手動輸入</button></div>`; }
+function promptQR(){ const c=prompt("輸入地點的 QR 代碼（部署後可改成相機掃描）："); if(c) arriveByQR(c); }
+function updateBar(){ if(!state.group){ $("#bar").style.display="none"; return; }
+  $("#crewName").innerHTML=`${state.group.name}<small>${state.group.id} 隊　${state.group.members||""}</small>`;
+  $("#inv").innerHTML=relevantItems().map(k=>{ const it=STORY.items[k],has=state.collected.has(k); return `<div class="shard ${has?'has':''}" title="${has?it.label:'尚未取得的數字記憶'}">${has?it.glyph:'？'}</div>`; }).join(""); }
+function openBook(){ const l=$("#bookList");
+  l.innerHTML = state.clueLog.length ? state.clueLog.map((c,i)=>`<div class="entry"><div class="e-lab">${c.label||("線索 "+(i+1))}</div><div>${c.text}</div></div>`).join("") : `<div class="empty">還沒有任何線索。</div>`;
+  $("#book").style.display="flex"; }
+function closeBook(){ $("#book").style.display="none"; }
+let toastT=null;
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.style.display="block"; clearTimeout(toastT); toastT=setTimeout(()=>t.style.display="none",3600); }
+
+/* ---- 進度保存（localStorage，重整/當掉可續玩）---- */
+function storyId(){ return (STORY.meta&&STORY.meta.id)||"default"; }
+function saveKey(){ return "quest_save_"+storyId(); }
+function qKey(){ return "quest_queue_"+storyId(); }
+function saveState(){ if(!state.group) return;
+  try{ localStorage.setItem(saveKey(), JSON.stringify({ v:1, phase:state.phase, group:state.group,
+    collected:[...state.collected], completed:[...state.completed], answers:state.answers,
+    clueLog:state.clueLog, navClue:state.navClue, activeTask:state.activeTask, taskStartTs:state.taskStartTs, at:Date.now() })); }catch(e){} }
+function loadSave(){ try{ return JSON.parse(localStorage.getItem(saveKey())||"null"); }catch(e){ return null; } }
+function clearSave(){ try{ localStorage.removeItem(saveKey()); }catch(e){} }
+function resetState(){
+  Object.assign(state,{phase:"intro",group:null,fragment:null,collected:new Set(),completed:new Set(),answers:{},clueLog:[],navClue:null,position:null,activeTask:null,taskStartTs:0});
+  pick={group:null}; chosen=null; clearClueTimer();
+  if(geoId!==null&&navigator.geolocation){ navigator.geolocation.clearWatch(geoId); geoId=null; } stopHeartbeat();
+  pendingPhoto=null; pendingPhotoFile=null; $("#bar").style.display="none"; closeBook(); }
+let pendingResume=null;
+function boot(){ const s=loadSave();
+  if(s&&s.group&&s.phase&&s.phase!=="intro"&&s.phase!=="setup"){ pendingResume=s; renderResume(s); }
+  else { resetState(); render(); } }
+function renderResume(s){
+  swap(`<div class="eyebrow">歡迎回來</div><h1 style="font-size:30px">${STORY.meta.title}</h1>
+    <p>偵測到「${s.group.name}」上次的進度（停在：<b>${phaseLabel(s.phase)}</b>，已完成 ${(s.completed||[]).length} 個任務）。要繼續還是重新開始？</p>
+    <button class="btn btn-go" onclick="doResume()">繼續上次進度 ▸</button>
+    <button class="btn btn-ghost" onclick="freshStart()">重新開始（清除上次進度）</button>`);
+}
+function doResume(){ const s=pendingResume; if(!s){ freshStart(); return; }
+  Object.assign(state,{ phase:s.phase, group:s.group, fragment:(STORY.prologue.fragments[s.group.id]||null),
+    collected:new Set(s.collected||[]), completed:new Set(s.completed||[]), answers:s.answers||{},
+    clueLog:s.clueLog||[], navClue:s.navClue||null, position:null, activeTask:s.activeTask||null, taskStartTs:s.taskStartTs||0 });
+  $("#bar").style.display="flex"; startGeo(); startHeartbeat(); updateQueueBadge(); render(); }
+function freshStart(){ clearSave(); resetState(); render(); }
+
+/* ---- 離線待送佇列（送不出去先存著，恢復連線自動補送）---- */
+function loadQueue(){ try{ return JSON.parse(localStorage.getItem(qKey())||"[]"); }catch(e){ return []; } }
+function saveQueue(q){ try{ localStorage.setItem(qKey(), JSON.stringify(q)); }
+  catch(e){ try{ q.shift(); localStorage.setItem(qKey(), JSON.stringify(q)); }catch(_){} } }
+function updateQueueBadge(){ const el=$("#qBadge"); if(!el) return; const n=loadQueue().length;
+  if(n>0){ el.style.display="inline-flex"; el.textContent="⏳ 未送出 "+n; } else el.style.display="none"; }
+function enqueue(payload){ const q=loadQueue(); q.push({id:Date.now()+"_"+Math.random().toString(36).slice(2,7),payload:payload}); saveQueue(q); updateQueueBadge(); flushQueue(); }
+let flushing=false;
+function flushQueue(){ if(!backendOn()||flushing) return; const q=loadQueue(); if(!q.length){ updateQueueBadge(); return; }
+  flushing=true; const item=q[0];
+  fetch(STORY.backend.url,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(item.payload)})
+    .then(()=>{ const cur=loadQueue().filter(x=>x.id!==item.id); saveQueue(cur); flushing=false; updateQueueBadge(); if(cur.length) setTimeout(flushQueue,300); })
+    .catch(()=>{ flushing=false; updateQueueBadge(); }); }
+window.addEventListener("online", flushQueue);
+setInterval(()=>{ if(loadQueue().length) flushQueue(); }, 20000);
+
+/* ---- QR 相機掃描（無相機或離線時自動退回手動輸入）---- */
+let qrScanner=null, qrScanned=false;
+function startScan(){
+  if(typeof Html5Qrcode==="undefined"){ promptQR(); return; }
+  qrScanned=false; const ov=$("#scanner"); if(ov) ov.style.display="flex";
+  try{ qrScanner=new Html5Qrcode("reader");
+    qrScanner.start({facingMode:"environment"},{fps:10,qrbox:240},
+      txt=>{ if(qrScanned) return; qrScanned=true; stopScan(); arriveByQR(txt); }, ()=>{})
+      .catch(()=>{ stopScan(); toast("無法開啟相機，改用手動輸入。"); promptQR(); });
+  }catch(e){ stopScan(); promptQR(); }
+}
+function stopScan(){ const ov=$("#scanner"); if(ov) ov.style.display="none";
+  if(qrScanner){ try{ qrScanner.stop().then(()=>{ try{qrScanner.clear();}catch(_){ } qrScanner=null; }).catch(()=>{qrScanner=null;}); }catch(e){ qrScanner=null; } } }
+function manualFromScan(){ stopScan(); promptQR(); }
+
+function endFlood(){ const f=$("#flood"); if(!f) return; f.style.transition="opacity .6s"; f.style.opacity="0"; setTimeout(()=>f.remove(),600); }
+setTimeout(endFlood,4200);
+function toggleTest(){ const p=$("#testPanel"); p.style.display=p.style.display==="block"?"none":"block"; refreshTest(); }
+function refreshTest(){ const box=$("#testTargets"); if(!box) return; const targets=activeTargets();
+  let html=`<div class="tnote">身份：${state.group?state.group.name+'（'+state.group.id+'隊）':'尚未組隊'} · 階段：${phaseLabel()}</div>`;
+  if(!targets.length) html+=`<div class="tnote" style="color:var(--gold)">目前沒有新進展的點（可能在讀對話，或需先蒐集線索）。</div>`;
+  targets.forEach(t=>{ html+=`<button class="tbtn sim" onclick="arriveBySim('${t.id}')">📍 模擬抵達：${t.name}</button>`; });
+  box.innerHTML=html; }
+function phaseLabel(){ return {intro:"教室說明",setup:"組隊",prologue:"尋找起點",hub:"探索中",task:"任務中",ending:"尾聲"}[state.phase]||state.phase; }
+function manualQR(){ const c=$("#qrInput").value; if(c){ arriveByQR(c); $("#qrInput").value=""; } }
+function loadPackFile(inp){ const f=inp.files&&inp.files[0]; if(!f) return; const rd=new FileReader();
+  rd.onload=()=>{ try{ const obj=JSON.parse(rd.result); if(!obj||!Array.isArray(obj.tasks)) throw new Error("這份 JSON 缺少 tasks 任務清單");
+    STORY=obj; alert("已載入故事包：「"+((obj.meta&&obj.meta.title)||"未命名")+"」"); resetGame();
+  }catch(e){ alert("讀取失敗："+e.message); } }; rd.readAsText(f); }
+function resetGame(){ clearSave(); resetState(); render(); }
+let booted=false;
+function bootOnce(){ if(booted) return; booted=true; boot(); }
+(function(){ try{ fetch("story.json").then(r=>r&&r.ok?r.json():null).then(o=>{ if(o&&Array.isArray(o.tasks)) STORY=o; }).catch(()=>{}).finally(bootOnce); }catch(e){ bootOnce(); } })();
+setTimeout(bootOnce,2500);
+(function(){ for(let i=0;i<10;i++){ const b=document.createElement("div"); b.className="bubble";
+  const s=6+Math.random()*22; b.style.width=b.style.height=s+"px"; b.style.left=Math.random()*100+"vw";
+  b.style.setProperty("--dx",(Math.random()*40-20)+"px"); b.style.animationDuration=(10+Math.random()*14)+"s"; b.style.animationDelay=(-Math.random()*14)+"s";
+  document.body.appendChild(b); } })();
+</script>
+</body>
+</html>
