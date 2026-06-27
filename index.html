@@ -296,26 +296,28 @@ function sfxStamp(){ if(!Audi.ctx) return; const t0=Audi.ctx.currentTime;
   g.gain.setValueAtTime(.0001,t0); g.gain.linearRampToValueAtTime(.5,t0+.008); g.gain.exponentialRampToValueAtTime(.0001,t0+.22);
   o.connect(g).connect(Audi.sfx); o.start(t0); o.stop(t0+.26); }
 
-/* 時空漂浮背景樂：Dm–B♭–F–C 緩慢循環，鋪底長音＋柔和琶音＋星塵鐘聲高音 */
+/* 時空任務背景樂：Am–F–C–G 推進循環，鼓組（大鼓/中鼓/高帽）＋跳動貝斯＋流動琶音＋動機旋律 */
 const MUS = (function(){
-  const N={D2:73.42,Bb2:116.54,F2:87.31,C2:65.41,D4:293.66,E4:329.63,F4:349.23,G4:392,A4:440,Bb4:466.16,C5:523.25,D5:587.33,E5:659.25,F5:698.46,G5:783.99,A5:880,C6:1046.5,D6:1174.66};
+  const N={A2:110,F2:87.31,C2:65.41,G2:98,C4:261.63,D4:293.66,E4:329.63,F4:349.23,G4:392,A4:440,B4:493.88,C5:523.25,D5:587.33,E5:659.25,F5:698.46,G5:783.99,A5:880};
   const chords=[
-    {bass:N.D2,  arp:[N.D4,N.F4,N.A4,N.F4],   mel:[N.A5,0,0,0,0,0,N.F5,0]},
-    {bass:N.Bb2, arp:[N.F4,N.Bb4,N.D5,N.Bb4], mel:[0,0,N.D6,0,0,0,0,0]},
-    {bass:N.F2,  arp:[N.F4,N.A4,N.C5,N.A4],   mel:[N.C6,0,0,0,N.A5,0,0,0]},
-    {bass:N.C2,  arp:[N.E4,N.G4,N.C5,N.G4],   mel:[0,0,0,0,N.G5,0,N.E5,0]}
+    {bass:N.A2, arp:[N.A4,N.C5,N.E5,N.C5], mel:[N.A4,0,N.C5,0,N.E5,0,0,0]},   // Am
+    {bass:N.F2, arp:[N.F4,N.A4,N.C5,N.A4], mel:[0,0,N.F5,0,0,N.E5,0,0]},       // F
+    {bass:N.C2, arp:[N.G4,N.C5,N.E5,N.C5], mel:[N.G5,0,0,N.E5,0,0,N.C5,0]},    // C
+    {bass:N.G2, arp:[N.G4,N.B4,N.D5,N.B4], mel:[0,N.D5,0,0,N.G5,0,N.F5,0]}     // G
   ];
   return { N, chords };
 })();
 function scheduleStep(s, t){
   const ci=Math.floor(s/8)%4, pos=s%8, ch=MUS.chords[ci];
-  if(pos===0) tone(ch.bass, t, .95, "triangle", .11, Audi.music);                   // 低音長音鋪底（每和弦）
-  if(pos===4) tone(ch.bass*2, t, .5, "sine", .04, Audi.music);                      // 中段柔和回響
-  if(pos%2===0) tone(ch.arp[(pos/2)%4], t, .55, "sine", .045, Audi.music);          // 柔和琶音
-  const m=ch.mel[pos]; if(m) tone(m, t, .85, "sine", .05, Audi.music);              // 星塵高音（鐘聲般）
+  if(pos===0||pos===4) tone(70, t, .12, "triangle", .15, Audi.music);               // 大鼓（拍1、3）
+  if(pos===2||pos===6) tone(150, t, .09, "triangle", .07, Audi.music);              // 中鼓（拍2、4）
+  tone(7200, t, .016, "square", .016, Audi.music);                                  // 高帽（每個八分）
+  if(pos%2===0) tone(ch.bass, t, .22, "triangle", .11, Audi.music);                 // 貝斯：每拍跳動
+  tone(ch.arp[pos%4], t, .20, "sine", .04, Audi.music);                             // 琶音：每個八分流動
+  const m=ch.mel[pos]; if(m) tone(m, t, .26, "triangle", .055, Audi.music);         // 動機旋律
 }
 function musicScheduler(){
-  if(!Audi.ctx) return; const eighth = (60/88)/2; // 88 BPM 的八分音（漂浮慢板）
+  if(!Audi.ctx) return; const eighth = (60/104)/2; // 104 BPM 的八分音（出任務節奏）
   while(Audi.nextT < Audi.ctx.currentTime + 0.15){
     scheduleStep(Audi.step, Audi.nextT);
     Audi.nextT += eighth; Audi.step = (Audi.step+1)%32;
@@ -412,7 +414,7 @@ function stopHeartbeat(){ if(hbTimer){ clearInterval(hbTimer); hbTimer=null; } }
 /* ---- 對話 / 提示 ---- */
 let playToken=0, hintTimers=[];
 function clearHintTimers(){ hintTimers.forEach(clearTimeout); hintTimers=[]; }
-function typingDelay(t){ return 450+Math.min((t||"").length*42,1400); }
+function typingDelay(t){ return 1500; }   // 漂浮點點固定 1.5 秒
 function scrollChat(box){ const last=box&&box.lastElementChild; if(last&&last.scrollIntoView) last.scrollIntoView({behavior:"smooth",block:"nearest"}); }
 function appendVoice(sel,v){ const box=document.querySelector(sel); if(!box) return;
   const d=document.createElement("div"); d.className="voice voice-"+v.who;
@@ -454,7 +456,7 @@ function startClueTimer(){ clearClueTimer();
         for(let i=state.navClue.recorded;i<ly.length;i++) state.clueLog.push({label:(state.navClue.label||"線索")+"（更明確）",text:ly[i]});
         state.navClue.recorded=ly.length; refreshClueBox();
         toast(((STORY.meta&&STORY.meta.voice)||"訊號源")+"傳來更清楚的訊號（已記入線索簿）"); saveState();
-      }, 1100);
+      }, 1500);
     }
     if(layers.length >= 1+state.navClue.hints.length) clearClueTimer();
   },3000); }
