@@ -21,7 +21,7 @@ body{font-family:var(--sans);color:var(--foam);background:var(--abyss);line-heig
 #sea{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(120% 80% at 50% -10%, #2a2160 0%, var(--deep) 42%, var(--abyss) 82%)}
 #sea::after{content:"";position:absolute;inset:0;background:radial-gradient(60% 40% at 50% 0%, rgba(127,224,255,.09), transparent 70%);animation:caustic 9s ease-in-out infinite}
 @keyframes caustic{0%,100%{opacity:.5;transform:translateY(0)}50%{opacity:.9;transform:translateY(10px)}}
-.bubble{position:fixed;bottom:-40px;border-radius:50%;z-index:0;pointer-events:none;background:radial-gradient(circle at 35% 30%, rgba(217,165,49,.22), rgba(143,182,201,.05) 60%, transparent 70%);animation:rise linear infinite}
+.bubble{position:fixed;bottom:-10px;border-radius:50%;z-index:0;pointer-events:none;background:radial-gradient(circle, rgba(127,224,255,.6), rgba(127,224,255,.06) 60%, transparent 72%);box-shadow:0 0 6px rgba(127,224,255,.45);animation:rise linear infinite}
 @keyframes rise{to{transform:translateY(-110vh) translateX(var(--dx,0));opacity:0}}
 #app{position:relative;z-index:2;max-width:680px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding:0 20px 40px}
 #bar{position:sticky;top:0;z-index:5;display:none;align-items:center;gap:10px;padding:12px 14px;margin:0 -20px 18px;background:linear-gradient(var(--abyss),rgba(7,26,43,.86));border-bottom:1px solid rgba(95,227,208,.18);backdrop-filter:blur(6px)}
@@ -294,26 +294,26 @@ function sfxStamp(){ if(!Audi.ctx) return; const t0=Audi.ctx.currentTime;
   g.gain.setValueAtTime(.0001,t0); g.gain.linearRampToValueAtTime(.5,t0+.008); g.gain.exponentialRampToValueAtTime(.0001,t0+.22);
   o.connect(g).connect(Audi.sfx); o.start(t0); o.stop(t0+.26); }
 
-/* 輕快探索背景樂：C–G–Am–F 循環，貝斯＋琶音＋稀疏旋律 */
+/* 時空漂浮背景樂：Dm–B♭–F–C 緩慢循環，鋪底長音＋柔和琶音＋星塵鐘聲高音 */
 const MUS = (function(){
-  const N={C2:65.41,G2:98,A2:110,F2:87.31,C4:261.63,D4:293.66,E4:329.63,F4:349.23,G4:392,A4:440,B4:493.88,C5:523.25,D5:587.33,E5:659.25,F5:698.46,G5:783.99,A5:880};
-  // 4 和弦，每和弦 8 個八分音；bass=每和弦根音，arp=循環和弦音，mel=稀疏旋律
+  const N={D2:73.42,Bb2:116.54,F2:87.31,C2:65.41,D4:293.66,E4:329.63,F4:349.23,G4:392,A4:440,Bb4:466.16,C5:523.25,D5:587.33,E5:659.25,F5:698.46,G5:783.99,A5:880,C6:1046.5,D6:1174.66};
   const chords=[
-    {bass:N.C2, arp:[N.C4,N.E4,N.G4,N.E4], mel:[N.G4,0,N.E4,0,0,N.G4,0,0]},
-    {bass:N.G2, arp:[N.D4,N.G4,N.B4,N.G4], mel:[0,0,N.D5,0,N.B4,0,0,0]},
-    {bass:N.A2, arp:[N.A4,N.C5,N.E5,N.C5], mel:[N.E5,0,0,N.C5,0,0,N.A4,0]},
-    {bass:N.F2, arp:[N.F4,N.A4,N.C5,N.A4], mel:[0,N.C5,0,0,N.F5,0,N.E5,0]}
+    {bass:N.D2,  arp:[N.D4,N.F4,N.A4,N.F4],   mel:[N.A5,0,0,0,0,0,N.F5,0]},
+    {bass:N.Bb2, arp:[N.F4,N.Bb4,N.D5,N.Bb4], mel:[0,0,N.D6,0,0,0,0,0]},
+    {bass:N.F2,  arp:[N.F4,N.A4,N.C5,N.A4],   mel:[N.C6,0,0,0,N.A5,0,0,0]},
+    {bass:N.C2,  arp:[N.E4,N.G4,N.C5,N.G4],   mel:[0,0,0,0,N.G5,0,N.E5,0]}
   ];
   return { N, chords };
 })();
 function scheduleStep(s, t){
   const ci=Math.floor(s/8)%4, pos=s%8, ch=MUS.chords[ci];
-  if(pos===0||pos===4) tone(ch.bass, t, .42, "triangle", .12, Audi.music);          // 貝斯（拍1、拍3）
-  if(pos%2===0) tone(ch.arp[(pos/2)%4], t, .30, "sine", .05, Audi.music);            // 琶音（每拍）
-  const m=ch.mel[pos]; if(m) tone(m, t, .26, "triangle", .055, Audi.music);          // 稀疏旋律
+  if(pos===0) tone(ch.bass, t, .95, "triangle", .11, Audi.music);                   // 低音長音鋪底（每和弦）
+  if(pos===4) tone(ch.bass*2, t, .5, "sine", .04, Audi.music);                      // 中段柔和回響
+  if(pos%2===0) tone(ch.arp[(pos/2)%4], t, .55, "sine", .045, Audi.music);          // 柔和琶音
+  const m=ch.mel[pos]; if(m) tone(m, t, .85, "sine", .05, Audi.music);              // 星塵高音（鐘聲般）
 }
 function musicScheduler(){
-  if(!Audi.ctx) return; const eighth = (60/112)/2; // 112 BPM 的八分音
+  if(!Audi.ctx) return; const eighth = (60/88)/2; // 88 BPM 的八分音（漂浮慢板）
   while(Audi.nextT < Audi.ctx.currentTime + 0.15){
     scheduleStep(Audi.step, Audi.nextT);
     Audi.nextT += eighth; Audi.step = (Audi.step+1)%32;
@@ -668,9 +668,10 @@ let booted=false;
 function bootOnce(){ if(booted) return; booted=true; boot(); }
 (function(){ try{ fetch("story.json").then(r=>r&&r.ok?r.json():null).then(o=>{ if(o&&Array.isArray(o.tasks)) STORY=o; }).catch(()=>{}).finally(bootOnce); }catch(e){ bootOnce(); } })();
 setTimeout(bootOnce,2500);
-(function(){ for(let i=0;i<10;i++){ const b=document.createElement("div"); b.className="bubble";
-  const s=6+Math.random()*22; b.style.width=b.style.height=s+"px"; b.style.left=Math.random()*100+"vw";
-  b.style.setProperty("--dx",(Math.random()*40-20)+"px"); b.style.animationDuration=(10+Math.random()*14)+"s"; b.style.animationDelay=(-Math.random()*14)+"s";
+(function(){ for(let i=0;i<16;i++){ const b=document.createElement("div"); b.className="bubble";
+  const s=2+Math.random()*4; b.style.width=b.style.height=s+"px"; b.style.left=Math.random()*100+"vw";
+  b.style.opacity=(.3+Math.random()*.5);
+  b.style.setProperty("--dx",(Math.random()*60-30)+"px"); b.style.animationDuration=(16+Math.random()*16)+"s"; b.style.animationDelay=(-Math.random()*20)+"s";
   document.body.appendChild(b); } })();
 </script>
 </body>

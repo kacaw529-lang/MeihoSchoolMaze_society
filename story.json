@@ -80,7 +80,7 @@
       "A": {
         "img": "logo_time",
         "startTask": "a_SIGN1925",
-        "clueText": "殘影閃過……一面牆上貼著一張寫著 1925 的公告……",
+        "clue": "殘影閃過……一面牆上貼著一張寫著 1925 的公告……",
         "clueHints": [
           {
             "after": 30,
@@ -95,7 +95,7 @@
       "B": {
         "img": "logo_time",
         "startTask": "b_PLUMERIA",
-        "clueText": "一陣淡香……白色花瓣、黃色花心，在風裡飄……",
+        "clue": "一陣淡香……白色花瓣、黃色花心，在風裡飄……",
         "clueHints": [
           {
             "after": 30,
