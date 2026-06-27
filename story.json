@@ -160,7 +160,7 @@
       "validation": {
         "type": "choice",
         "value": "all",
-        "successText": "對，公告是給大家看的公共資訊。 時空碎片到手！",
+        "successText": "對，公告是給大家看的公共資訊。 時空節點穩住了！",
         "failText": "公告是公開給全校師生看的。"
       },
       "onComplete": {
@@ -272,7 +272,7 @@
       "validation": {
         "type": "choice",
         "value": "clean",
-        "successText": "對，要保持乾淨、愛護環境。 時空碎片到手！",
+        "successText": "對，要保持乾淨、愛護環境。 時空節點穩住了！",
         "failText": "要保持池塘乾淨，動物才有家。"
       },
       "onComplete": {
@@ -384,7 +384,7 @@
       "validation": {
         "type": "choice",
         "value": "farmer",
-        "successText": "對，是農夫種的（生產者）。 時空碎片到手！",
+        "successText": "對，是農夫種的（生產者）。 時空節點穩住了！",
         "failText": "水果是農夫種出來的。"
       },
       "onComplete": {
@@ -496,7 +496,7 @@
       "validation": {
         "type": "choice",
         "value": "home",
-        "successText": "對，是認識家鄉與在地文化。 時空碎片到手！",
+        "successText": "對，是認識家鄉與在地文化。 時空節點穩住了！",
         "failText": "部落繪畫和家鄉、在地文化有關。"
       },
       "onComplete": {
@@ -618,7 +618,7 @@
       "validation": {
         "type": "choice",
         "value": "share",
-        "successText": "對，要輪流、守規則。 時空碎片到手！",
+        "successText": "對，要輪流、守規則。 時空節點穩住了！",
         "failText": "公共場所要輪流、守規則。"
       },
       "onComplete": {
@@ -773,7 +773,7 @@
         "value": [
           "雞蛋花"
         ],
-        "successText": "對，俗稱雞蛋花。 時空碎片到手！",
+        "successText": "對，俗稱雞蛋花。 時空節點穩住了！",
         "failText": "緬梔花俗稱『雞蛋花』。"
       },
       "onComplete": {
@@ -890,7 +890,7 @@
       "validation": {
         "type": "choice",
         "value": "safe",
-        "successText": "對，維護上下學交通安全。 時空碎片到手！",
+        "successText": "對，維護上下學交通安全。 時空節點穩住了！",
         "failText": "導護是維護上下學安全。"
       },
       "onComplete": {
@@ -1002,7 +1002,7 @@
       "validation": {
         "type": "choice",
         "value": "stand",
-        "successText": "對，立正、安靜。 時空碎片到手！",
+        "successText": "對，立正、安靜。 時空節點穩住了！",
         "failText": "升旗要立正、安靜。"
       },
       "onComplete": {
@@ -1114,7 +1114,7 @@
       "validation": {
         "type": "choice",
         "value": "letter",
-        "successText": "對，以前常用寫信（工具會演變）。 時空碎片到手！",
+        "successText": "對，以前常用寫信（工具會演變）。 時空節點穩住了！",
         "failText": "以前沒網路手機，常用寫信聯絡。"
       },
       "onComplete": {
@@ -1226,7 +1226,7 @@
       "validation": {
         "type": "choice",
         "value": "env",
-        "successText": "對，珍惜資源、愛護環境。 時空碎片到手！",
+        "successText": "對，珍惜資源、愛護環境。 時空節點穩住了！",
         "failText": "魚菜共生是珍惜資源、愛護環境。"
       },
       "onComplete": {

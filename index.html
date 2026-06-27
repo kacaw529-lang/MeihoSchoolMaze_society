@@ -55,6 +55,8 @@ p{margin-bottom:14px;color:#d7e6ea}
 .typing i{width:7px;height:7px;border-radius:50%;background:var(--glow);animation:blink 1.2s infinite}
 .typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
 @keyframes blink{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
+.clue-recv{margin-top:10px;align-items:center;background:rgba(91,70,196,.18);border-color:rgba(127,224,255,.3)}
+.clue-recv .recv-lab{font-family:var(--mono);font-size:11px;color:var(--glow);margin-right:9px;letter-spacing:1px}
 #composer{position:sticky;bottom:0;padding:10px 0 4px;background:linear-gradient(transparent,var(--abyss) 22%)}
 .hint-img{width:100%;max-width:300px;margin:6px auto 16px;display:block;border-radius:12px;border:1px solid rgba(143,179,191,.3);background:rgba(28,35,48,.5)}
 .hint-img svg{width:100%;height:auto;display:block;border-radius:12px}
@@ -434,17 +436,25 @@ function setNavClue(base, hints, label){
 function navLayers(){ const c=state.navClue; if(!c) return [];
   const out = c.base ? [c.base] : []; const el=(Date.now()-c.startTs)/1000;
   c.hints.forEach(h=>{ if(el >= (h.after||0)) out.push(h.text); }); return out; }
+function clueBoxBody(layers){ return `<div class="lab">線索 · ${state.navClue.label}</div>`+layers.map((t,i)=>`<div class="txt${i>0?' more':''}">${t}</div>`).join(""); }
 function refreshClueBox(){ const box=document.getElementById("clueBox"); if(!box) return;
   const layers=navLayers();
   if(!state.navClue || !layers.length){ box.innerHTML=`<div class="txt" style="color:var(--muted)">還沒有線索。</div>`; return; }
-  box.innerHTML=`<div class="lab">線索 · ${state.navClue.label}</div>`+layers.map((t,i)=>`<div class="txt${i>0?' more':''}">${t}</div>`).join(""); }
+  box.innerHTML=clueBoxBody(layers); }
 function startClueTimer(){ clearClueTimer();
   if(!state.navClue || !state.navClue.hints.length) return;
   clueTimer=setInterval(()=>{
+    const box=document.getElementById("clueBox");
     const layers=navLayers();
     if(layers.length > state.navClue.recorded){
-      for(let i=state.navClue.recorded;i<layers.length;i++) state.clueLog.push({label:(state.navClue.label||"線索")+"（更明確）",text:layers[i]});
-      state.navClue.recorded=layers.length; refreshClueBox(); toast("調查局傳來更清楚的情報（已記入線索簿）"); saveState();
+      const shown=layers.slice(0, state.navClue.recorded);                          // 已顯示的層
+      if(box) box.innerHTML=clueBoxBody(shown)+`<div class="typing clue-recv"><span class="recv-lab">接收跨時空訊號…</span><i></i><i></i><i></i></div>`;
+      setTimeout(()=>{
+        const ly=navLayers();
+        for(let i=state.navClue.recorded;i<ly.length;i++) state.clueLog.push({label:(state.navClue.label||"線索")+"（更明確）",text:ly[i]});
+        state.navClue.recorded=ly.length; refreshClueBox();
+        toast(((STORY.meta&&STORY.meta.voice)||"訊號源")+"傳來更清楚的訊號（已記入線索簿）"); saveState();
+      }, 1100);
     }
     if(layers.length >= 1+state.navClue.hints.length) clearClueTimer();
   },3000); }
