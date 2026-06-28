@@ -765,7 +765,7 @@
         }
       ],
       "response": {
-        "type": "keywords",
+        "type": "text",
         "prompt": "看吊牌：緬梔花的俗稱是什麼花？（三個字）"
       },
       "validation": {
