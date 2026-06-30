@@ -27,7 +27,17 @@ body{font-family:var(--sans);color:var(--foam);background:var(--abyss);line-heig
 #bar{position:sticky;top:0;z-index:5;display:none;align-items:center;gap:10px;padding:12px 14px;margin:0 -20px 18px;background:linear-gradient(var(--abyss),rgba(7,26,43,.86));border-bottom:1px solid rgba(95,227,208,.18);backdrop-filter:blur(6px)}
 #bar .crew{font-family:var(--serif);font-weight:700;font-size:15px;letter-spacing:.5px;min-width:0;flex:1 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #bar .crew small{display:block;font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px;font-weight:400}
-#barBtns{margin-left:auto;display:flex;gap:8px;align-items:center;flex-shrink:0;max-width:62%;overflow:hidden}
+#barBtns{margin-left:auto;display:flex;gap:8px;align-items:center;flex-shrink:0;max-width:54%;overflow:hidden}
+.clock{font-family:var(--mono);font-weight:700;font-size:15px;letter-spacing:1px;color:var(--glow);background:rgba(127,224,255,.12);border:1px solid rgba(127,224,255,.35);border-radius:999px;padding:4px 11px;flex:0 0 auto;margin:0 8px;white-space:nowrap}
+.clock.low{color:#ffc2b6;background:rgba(178,58,72,.2);border-color:rgba(255,150,130,.55)}
+.clock.done{color:#9be8b0;background:rgba(60,150,90,.2);border-color:rgba(120,220,150,.55)}
+.clock.flash{animation:clockflash .55s ease}
+@keyframes clockflash{0%{transform:scale(1)}35%{transform:scale(1.22);color:#ffd0c6}100%{transform:scale(1)}}
+.hintbtn{display:block;width:100%;margin-top:12px;padding:10px;border-radius:10px;border:1px dashed var(--gold);background:rgba(217,165,49,.12);color:var(--gold);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.5px}
+.hintbtn:active{transform:scale(.98)}
+.endclock{margin:14px auto;max-width:340px;text-align:center;background:rgba(127,224,255,.1);border:1px solid rgba(127,224,255,.35);border-radius:14px;padding:14px}
+.endclock .big{font-family:var(--mono);font-weight:800;font-size:40px;color:var(--glow);letter-spacing:2px}
+.endclock .cap{font-size:13px;color:var(--muted);margin-top:4px}
 .bookbtn{font-family:var(--sans);font-size:12px;font-weight:700;color:var(--glow);background:rgba(95,227,208,.10);border:1px solid rgba(95,227,208,.4);border-radius:9px;padding:7px 10px;cursor:pointer}
 #inv{display:flex;gap:6px}
 .shard{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;border:1px solid rgba(143,179,191,.35);color:var(--muted);font-size:15px;background:rgba(13,43,62,.6);transition:.4s}
@@ -140,6 +150,7 @@ label.lbl{display:block;font-size:13px;color:var(--muted);margin-top:16px;letter
   <button class="skip" onclick="endFlood()">略過 ▸</button>
 </div>
 <div id="app"><div id="bar"><div class="crew" id="crewName">—</div>
+  <div id="clock" class="clock" style="display:none">30:00</div>
   <div id="barBtns"><span id="qBadge" class="qbadge" style="display:none"></span><button class="bookbtn" onclick="openBook()">📜 線索簿</button><div id="inv"></div></div></div>
 <div id="screen" class="screen"></div></div>
 <div id="book"><div class="panel"><h3>線索簿</h3><div class="sub">已得到的線索都記在這。卡關時調查局會慢慢給更明確的情報。</div><div id="bookList"></div>
@@ -244,6 +255,18 @@ function clueImg(code){ if(typeof code!=="string"||!code) return "";
 const state = { phase:"intro", group:null, fragment:null, collected:new Set(),
   completed:new Set(), answers:{}, clueLog:[], navClue:null, position:null, activeTask:null, taskStartTs:0 };
 const $ = s => document.querySelector(s);
+
+/* ============================================================
+   ★ 可調參數（老師調整這裡即可，不用動其他程式）★
+   ============================================================ */
+const CONFIG = {
+  gameMinutes : 30,    // 每組倒數總時間（分鐘）
+  autoHintSec : 20,    // 卡住多久自動給「下一段提示」（秒）；多段提示會依倍數出現（20、40…）
+  hintCostMin : 5,     // 按鈕解開「最明確提示」要扣掉的時間（分鐘）
+  typingMs    : 1500   // 訊息／接收訊號的漂浮點點顯示時間（毫秒）
+};
+/* ============================================================ */
+
 const screenEl = $("#screen");
 function task(id){ return STORY.tasks.find(t=>t.id===id); }
 function vlabel(){ return (STORY.meta && STORY.meta.voice) || "線索"; }
@@ -414,7 +437,7 @@ function stopHeartbeat(){ if(hbTimer){ clearInterval(hbTimer); hbTimer=null; } }
 /* ---- 對話 / 提示 ---- */
 let playToken=0, hintTimers=[];
 function clearHintTimers(){ hintTimers.forEach(clearTimeout); hintTimers=[]; }
-function typingDelay(t){ return 1500; }   // 漂浮點點固定 1.5 秒
+function typingDelay(t){ return CONFIG.typingMs; }
 function scrollChat(box){ const last=box&&box.lastElementChild; if(last&&last.scrollIntoView) last.scrollIntoView({behavior:"smooth",block:"nearest"}); }
 function appendVoice(sel,v){ const box=document.querySelector(sel); if(!box) return;
   const d=document.createElement("div"); d.className="voice voice-"+v.who;
@@ -431,35 +454,55 @@ function say(v,cb){ showTyping("#chat",v.text,()=>{ appendVoice("#chat",v); cb&&
 let clueTimer=null;
 function clearClueTimer(){ if(clueTimer){ clearInterval(clueTimer); clueTimer=null; } }
 function setNavClue(base, hints, label){
-  state.navClue = { label:label||"線索", base:base||"", hints:(hints||[]).slice().sort((a,b)=>(a.after||0)-(b.after||0)), startTs:Date.now(), recorded:0 };
+  const hs=(hints||[]).map(h=>({after:h.after||0,text:h.text})).sort((a,b)=>a.after-b.after);
+  hs.forEach((h,i)=>{ if(i<hs.length-1) h.after=(i+1)*CONFIG.autoHintSec; });  // 計時提示用 CONFIG 秒數；最後一段是按鈕扣時、不計時
+  state.navClue = { label:label||"線索", base:base||"", hints:hs, startTs:Date.now(), recorded:0, manualShown:false };
   if(base){ state.clueLog.push({label:label||"線索", text:base}); state.navClue.recorded=1; }
   saveState();
 }
-function navLayers(){ const c=state.navClue; if(!c) return [];
+// 最後一段提示改為「按鈕揭曉、扣 5 分鐘」；其餘提示照時間自動出現
+function timedHints(){ const h=(state.navClue&&state.navClue.hints)||[]; return h.length? h.slice(0,-1) : []; }
+function manualHint(){ const h=(state.navClue&&state.navClue.hints)||[]; return h.length? h[h.length-1] : null; }
+function autoLayers(){ const c=state.navClue; if(!c) return [];
   const out = c.base ? [c.base] : []; const el=(Date.now()-c.startTs)/1000;
-  c.hints.forEach(h=>{ if(el >= (h.after||0)) out.push(h.text); }); return out; }
-function clueBoxBody(layers){ return `<div class="lab">線索 · ${state.navClue.label}</div>`+layers.map((t,i)=>`<div class="txt${i>0?' more':''}">${t}</div>`).join(""); }
+  timedHints().forEach(h=>{ if(el >= (h.after||0)) out.push(h.text); }); return out; }
+function dispLayers(){ const c=state.navClue; const out=autoLayers(); const m=manualHint();
+  if(c && c.manualShown && m) out.push(m.text); return out; }
+function allTimedShown(){ const c=state.navClue; if(!c) return false; const el=(Date.now()-c.startTs)/1000; return timedHints().every(h=>el>=(h.after||0)); }
+function clueBoxBody(layers, showBtn){
+  let h=`<div class="lab">線索 · ${state.navClue.label}</div>`+layers.map((t,i)=>`<div class="txt${i>0?' more':''}">${t}</div>`).join("");
+  if(showBtn) h+=`<button class="hintbtn" onclick="openFinalHint()">🔓 解開最明確的線索（消耗 ${CONFIG.hintCostMin} 分鐘）</button>`;
+  return h;
+}
 function refreshClueBox(){ const box=document.getElementById("clueBox"); if(!box) return;
-  const layers=navLayers();
+  const layers=dispLayers();
   if(!state.navClue || !layers.length){ box.innerHTML=`<div class="txt" style="color:var(--muted)">還沒有線索。</div>`; return; }
-  box.innerHTML=clueBoxBody(layers); }
+  const showBtn = !!manualHint() && !state.navClue.manualShown && allTimedShown();
+  box.innerHTML=clueBoxBody(layers, showBtn); }
 function startClueTimer(){ clearClueTimer();
-  if(!state.navClue || !state.navClue.hints.length) return;
+  if(!state.navClue || !timedHints().length){ refreshClueBox(); return; }
   clueTimer=setInterval(()=>{
     const box=document.getElementById("clueBox");
-    const layers=navLayers();
-    if(layers.length > state.navClue.recorded){
-      const shown=layers.slice(0, state.navClue.recorded);                          // 已顯示的層
-      if(box) box.innerHTML=clueBoxBody(shown)+`<div class="typing clue-recv"><span class="recv-lab">接收跨時空訊號…</span><i></i><i></i><i></i></div>`;
+    const auto=autoLayers();
+    if(auto.length > state.navClue.recorded){
+      const shown=auto.slice(0, state.navClue.recorded);
+      if(box) box.innerHTML=clueBoxBody(shown,false)+`<div class="typing clue-recv"><span class="recv-lab">接收跨時空訊號…</span><i></i><i></i><i></i></div>`;
       setTimeout(()=>{
-        const ly=navLayers();
-        for(let i=state.navClue.recorded;i<ly.length;i++) state.clueLog.push({label:(state.navClue.label||"線索")+"（更明確）",text:ly[i]});
-        state.navClue.recorded=ly.length; refreshClueBox();
+        const a=autoLayers();
+        for(let i=state.navClue.recorded;i<a.length;i++) state.clueLog.push({label:(state.navClue.label||"線索")+"（更明確）",text:a[i]});
+        state.navClue.recorded=a.length; refreshClueBox();
         toast(((STORY.meta&&STORY.meta.voice)||"訊號源")+"傳來更清楚的訊號（已記入線索簿）"); saveState();
-      }, 1500);
+      }, CONFIG.typingMs);
     }
-    if(layers.length >= 1+state.navClue.hints.length) clearClueTimer();
+    if(auto.length >= 1+timedHints().length) clearClueTimer();
   },3000); }
+function openFinalHint(){ const c=state.navClue, m=manualHint(); if(!c||!m||c.manualShown) return;
+  c.manualShown=true; state.clueLog.push({label:(c.label||"線索")+"（最明確 · 已扣 "+CONFIG.hintCostMin+" 分鐘）", text:m.text});
+  timerPenalty(CONFIG.hintCostMin*60);
+  const box=document.getElementById("clueBox"); const cur=autoLayers();
+  if(box) box.innerHTML=clueBoxBody(cur,false)+`<div class="typing clue-recv"><span class="recv-lab">解碼最深層的時空訊號…</span><i></i><i></i><i></i></div>`;
+  setTimeout(()=>{ refreshClueBox(); toast("已解開最明確的線索，扣除 "+CONFIG.hintCostMin+" 分鐘"); saveState(); }, CONFIG.typingMs);
+}
 
 /* =========================================================================
    畫面
@@ -495,7 +538,7 @@ function confirmSetup(){ if(!pick.group){ alert("請先選一支隊伍。"); ret
   const g=STORY.groups.find(x=>x.id===pick.group);
   state.group={ id:g.id, name:($("#teamName").value||"").trim()||g.name, members:($("#members").value||"").trim() };
   state.fragment=STORY.prologue.fragments[g.id];
-  state.phase="prologue"; $("#bar").style.display="flex"; startGeo(); startHeartbeat(); render();
+  state.phase="prologue"; $("#bar").style.display="flex"; startTimer(); startGeo(); startHeartbeat(); render();
 }
 function renderPrologue(){
   const f=state.fragment;
@@ -562,6 +605,7 @@ function finishTask(id,val){
   if(!validate(t,val)){ sfxWrong(); say({who:"first",label:vlabel(),text:(t.validation&&t.validation.failText)||"再試一次。"}); return; }
   state.completed.add(id); clearHintTimers();
   const oc=t.onComplete||{};
+  if(oc.end) freezeTimer();
   if(oc.give) state.collected.add(oc.give);
   updateBar(); saveState();
   if(backendOn()){ const graded=t.validation&&t.validation.type!=="none";
@@ -583,20 +627,41 @@ function finishButtons(oc){ const cc=$("#composer"); if(!cc) return;
 function toHub(){ state.phase="hub"; render(); }
 function toEnding(){ stopHeartbeat(); if(geoId!==null&&navigator.geolocation){ navigator.geolocation.clearWatch(geoId); geoId=null; } state.phase="ending"; saveState(); render(); }
 function renderEnding(){
-  swap(`<div class="eyebrow">尾聲</div><h1 style="font-size:30px">最後的訊息</h1><div id="chat"></div><div id="composer"></div>`);
+  const r=timerRemaining(); const fin=state.timer&&state.timer.finishedRemaining!=null;
+  const banner=`<div class="endclock"><div class="big">${fmtClock(r)}</div><div class="cap">${fin?"任務完成時的剩餘時間 · 剩越多越厲害！和別隊比比看":"時間已用完（00:00）"}</div></div>`;
+  swap(`<div class="eyebrow">尾聲</div><h1 style="font-size:30px">最後的訊息</h1>${banner}<div id="chat"></div><div id="composer"></div>`);
   playQueue("#chat",STORY.ending,()=>{ const c=$("#composer"); if(c) c.innerHTML=`<button class="btn btn-go" onclick="resetGame()">↺ 再玩一次 / 換下一隊</button>`; });
 }
 function qrControls(){ return `<div class="smallbtns"><button class="btn btn-ghost" onclick="startScan()">📷 掃 QR 代碼</button><button class="btn btn-ghost" onclick="promptQR()">手動輸入</button></div>`; }
 function promptQR(){ const c=prompt("輸入地點的 QR 代碼（部署後可改成相機掃描）："); if(c) arriveByQR(c); }
 function updateBar(){ if(!state.group){ $("#bar").style.display="none"; return; }
   $("#crewName").innerHTML=`${state.group.name}<small>${state.group.id} 隊　${state.group.members||""}</small>`;
-  $("#inv").innerHTML=relevantItems().map(k=>{ const it=STORY.items[k],has=state.collected.has(k); return `<div class="shard ${has?'has':''}" title="${has?it.label:'尚未取得的數字記憶'}">${has?it.glyph:'？'}</div>`; }).join(""); }
+  $("#inv").innerHTML=relevantItems().map(k=>{ const it=STORY.items[k],has=state.collected.has(k); return `<div class="shard ${has?'has':''}" title="${has?it.label:'尚未取得的數字記憶'}">${has?it.glyph:'？'}</div>`; }).join(""); updateClock(); }
 function openBook(){ const l=$("#bookList");
   l.innerHTML = state.clueLog.length ? state.clueLog.map((c,i)=>`<div class="entry"><div class="e-lab">${c.label||("線索 "+(i+1))}</div><div>${c.text}</div></div>`).join("") : `<div class="empty">還沒有任何線索。</div>`;
   $("#book").style.display="flex"; }
 function closeBook(){ $("#book").style.display="none"; }
 let toastT=null;
 function toast(msg){ const t=$("#toast"); t.textContent=msg; t.style.display="block"; clearTimeout(toastT); toastT=setTimeout(()=>t.style.display="none",3600); }
+
+/* ---- 倒數計時：選組開始 30 分；答對最後密碼停錶；解最明確提示 −5 分 ---- */
+const GAME_SECONDS = CONFIG.gameMinutes*60;
+function timerRemaining(){ const t=state.timer; if(!t) return GAME_SECONDS;
+  if(t.finishedRemaining!=null) return t.finishedRemaining;
+  return Math.max(0, Math.round((t.endTime-Date.now())/1000)); }
+function timerPenalty(sec){ const t=state.timer; if(!t||t.finishedRemaining!=null) return;
+  t.endTime -= sec*1000; saveState();
+  const el=$("#clock"); if(el){ el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); } updateClock(); }
+function fmtClock(s){ s=Math.max(0,s|0); const m=Math.floor(s/60), ss=s%60; return (m<10?"0":"")+m+":"+(ss<10?"0":"")+ss; }
+function updateClock(){ const el=$("#clock"); if(!el) return;
+  if(!state.timer){ el.style.display="none"; return; }
+  el.style.display="inline-block"; const r=timerRemaining(); el.classList.remove("low","done");
+  if(state.timer.finishedRemaining!=null){ el.classList.add("done"); el.textContent="✓ "+fmtClock(r); }
+  else if(r<=0){ el.classList.add("low"); el.textContent="00:00 時間到"; }
+  else { if(r<300) el.classList.add("low"); el.textContent="⏳ "+fmtClock(r); } }
+function startTimer(){ state.timer={ endTime:Date.now()+GAME_SECONDS*1000, finishedRemaining:null }; saveState(); updateClock(); }
+function freezeTimer(){ if(state.timer && state.timer.finishedRemaining==null){ state.timer.finishedRemaining=timerRemaining(); saveState(); updateClock(); } }
+setInterval(()=>{ try{ updateClock(); }catch(e){} }, 1000);
 
 /* ---- 進度保存（localStorage，重整/當掉可續玩）---- */
 function storyId(){ return (STORY.meta&&STORY.meta.id)||"default"; }
@@ -605,11 +670,11 @@ function qKey(){ return "quest_queue_"+storyId(); }
 function saveState(){ if(!state.group) return;
   try{ localStorage.setItem(saveKey(), JSON.stringify({ v:1, phase:state.phase, group:state.group,
     collected:[...state.collected], completed:[...state.completed], answers:state.answers,
-    clueLog:state.clueLog, navClue:state.navClue, activeTask:state.activeTask, taskStartTs:state.taskStartTs, at:Date.now() })); }catch(e){} }
+    clueLog:state.clueLog, navClue:state.navClue, activeTask:state.activeTask, taskStartTs:state.taskStartTs, timer:state.timer, at:Date.now() })); }catch(e){} }
 function loadSave(){ try{ return JSON.parse(localStorage.getItem(saveKey())||"null"); }catch(e){ return null; } }
 function clearSave(){ try{ localStorage.removeItem(saveKey()); }catch(e){} }
 function resetState(){
-  Object.assign(state,{phase:"intro",group:null,fragment:null,collected:new Set(),completed:new Set(),answers:{},clueLog:[],navClue:null,position:null,activeTask:null,taskStartTs:0});
+  Object.assign(state,{phase:"intro",group:null,fragment:null,collected:new Set(),completed:new Set(),answers:{},clueLog:[],navClue:null,position:null,activeTask:null,taskStartTs:0,timer:null});
   pick={group:null}; chosen=null; clearClueTimer();
   if(geoId!==null&&navigator.geolocation){ navigator.geolocation.clearWatch(geoId); geoId=null; } stopHeartbeat();
   pendingPhoto=null; pendingPhotoFile=null; $("#bar").style.display="none"; closeBook(); }
@@ -626,8 +691,8 @@ function renderResume(s){
 function doResume(){ const s=pendingResume; if(!s){ freshStart(); return; }
   Object.assign(state,{ phase:s.phase, group:s.group, fragment:(STORY.prologue.fragments[s.group.id]||null),
     collected:new Set(s.collected||[]), completed:new Set(s.completed||[]), answers:s.answers||{},
-    clueLog:s.clueLog||[], navClue:s.navClue||null, position:null, activeTask:s.activeTask||null, taskStartTs:s.taskStartTs||0 });
-  $("#bar").style.display="flex"; startGeo(); startHeartbeat(); updateQueueBadge(); render(); }
+    clueLog:s.clueLog||[], navClue:s.navClue||null, position:null, activeTask:s.activeTask||null, taskStartTs:s.taskStartTs||0, timer:s.timer||null });
+  $("#bar").style.display="flex"; startGeo(); startHeartbeat(); updateQueueBadge(); updateClock(); render(); }
 function freshStart(){ clearSave(); resetState(); render(); }
 
 /* ---- 離線待送佇列（送不出去先存著，恢復連線自動補送）---- */
